@@ -111,6 +111,16 @@ function portal_manager_menu() {
       'type' => MENU_CALLBACK,
       'weight' => 11
   );
+    $items["portal/admin/games/delete"] = array(
+      'title' => 'Delete game',
+      'description' => 'Delete a game and all versions',
+      'access arguments' => array('upload games'),
+      'page callback' => 'portal_games_delete',
+      'file' => 'includes/page.game_delete.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 15
+  );
   return $items;
 }
 

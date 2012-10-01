@@ -17,22 +17,25 @@ function portal_subdomain_page() {
   }
   
   $header = array(
-      array('data' => t('ID'), 'field' => 'sdid', 'sort' => 'desc'),
-      array('data' => t('Name'), 'field' => 'name'),
-      array('data' => t('Group name'), 'field' => 'group_name'),
-      array('data' => t('Theme'), 'field' => 'theme_name'),
-      array('data' => t('Created by'), 'field' => 'created_by_name'),
-      array('data' => t('Updated by'), 'field' => 'updated_by_name'),
-      array('data' => t('Created on'), 'field' => 'created_on'),
-      array('data' => t('Updated on'), 'field' => 'updated_on'),
+      array('data' => t('ID'), 'field' => 'sdid', 'sort' => 'desc', 'class' => array('mg_center')),
+      array('data' => t('Name'), 'field' => 'name', 'class' => array('mg_center')),
+      array('data' => t('Group name'), 'field' => 'group_name',  'class' => array('mg_center')),
+      array('data' => t('Theme'), 'field' => 'theme_name', 'class' => array('mg_center')),
+      array('data' => t('Games'), 'field' => 'game_count', 'class' => array('mg_center')),
+      array('data' => t('Created by'), 'field' => 'created_by_name',  'class' => array('mg_center')),
+      array('data' => t('Updated by'), 'field' => 'updated_by_name',  'class' => array('mg_center')),
+      array('data' => t('Created on'), 'field' => 'created_on', 'class' => array('mg_center')),
+      array('data' => t('Updated on'), 'field' => 'updated_on', 'class' => array('mg_center')),
   );
 
   $query = db_select('microgame_subdomains', 'm');
     $query->join('users', 'u', 'm.created_by_uid = u.uid');
     $query->join('users', 'v', 'm.updated_by_uid = v.uid');
+    $query->leftJoin('microgame_subdomain_games', 'sg', 'm.sdid = sg.sdid');
     $query->fields('m');
     $query->addField('u', 'name', 'created_by_name');
     $query->addField('v', 'name', 'updated_by_name');
+    $query->addExpression('COUNT (sg.gid)', 'game_count');
     $details = $query->extend('PagerDefault')->limit(10)->extend('TableSort')->orderByHeader($header)->execute()->fetchAssoc();
   
 //  /$query = db_select('microgame_subdomains', 'm')->fields('m')->extend('PagerDefault')->limit(10)->extend('TableSort')->orderByHeader($header);
@@ -43,13 +46,13 @@ function portal_subdomain_page() {
     $fields = array();
     foreach ($header as $col) {
       if ($col['field'] == 'created_on' || $col['field'] == 'updated_on') {
-        $fields[$col['field']] = format_date($row->$col['field'], 'short');
+        $fields[$col['field']] = array('data' => format_date($row->$col['field'], 'short'), 'class' => array('mg_center'));
       } 
       else if ($col['field'] == 'theme_name') {
         $fields[$col['field']] = $theme_list[$row->$col['field']];
       }
       else {
-        $fields[$col['field']] = $row->$col['field'];
+        $fields[$col['field']] = array('data' => $row->$col['field'], 'class' => array('mg_center'));
       }
     }
     $fields['edit'] =  l(t('edit'),  'portal/admin/subdomains/edit/' .  $row->name);
