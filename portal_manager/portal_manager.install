@@ -14,6 +14,20 @@ function portal_manager_uninstall() {
   menu_delete('microgame_portal');
 }
 
+function portal_manager_requirements($phase) {
+  $requirements = array();
+  if ($phase == 'install') {
+    if (!variable_get('file_private_path', FALSE)) {
+      $requirements['private_streamwrapper'] = array(
+          'title' => st('private streamwrapper file location'),
+          'description' => st('The private file system path <a href="config/media/file-system">setting</a> must be set in the file section under configuration'),
+          'severity' => REQUIREMENT_ERROR
+          );
+    }
+  }
+  return $requirements;
+}
+
 function portal_manager_install() {
 
   // fetch all permissions from db so we can check if attached module still exists
