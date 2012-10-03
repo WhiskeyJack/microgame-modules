@@ -22,7 +22,7 @@ function portal_manager_requirements($phase) {
           'title' => st('private streamwrapper file location'),
           'description' => st('The private file system path <a href="config/media/file-system">setting</a> must be set in the file section under configuration'),
           'severity' => REQUIREMENT_ERROR
-          );
+      );
     }
   }
   return $requirements;
@@ -81,7 +81,7 @@ function portal_manager_install() {
       'description' => st('Microgame portal administration pages'),
   );
   menu_save($menu);
-  
+
   // create directory for storing the games
   drupal_mkdir('private://games/');
 }
@@ -239,32 +239,8 @@ function portal_manager_schema() {
       ),
       'primary key' => array('gid', 'version_id'),
   );
-  
-  $schema['microgame_game_versions'] = array(
-      'description' => 'Contains the game made available for a domain',
-      'fields' => array(
-          'sdid' => array(
-              'description' => 'Subdomain ID',
-              'type' => 'int',
-              'length' => 4,
-              'not null' => TRUE,
-          ),
-          'gid' => array(
-              'description' => 'Game ID',
-              'type' => 'int',
-              'length' => 4,
-              'not null' => TRUE,
-          ),
-          'enabled' => array(
-              'description' => 'Indicates if the game can be played for the domain',
-              'type' => 'int',
-              'length' => 4,
-              'not null' => TRUE,
-          ),
-      ),
-      'primary key' => array('sdid', 'gid'),
-  );
-    $schema['microgame_subdomain_games'] = array(
+
+  $schema['microgame_subdomain_games'] = array(
       'description' => 'Contains the games made available for a subdomain',
       'fields' => array(
           'sdid' => array(
@@ -294,6 +270,6 @@ function portal_manager_schema() {
       ),
       'primary key' => array('sdid', 'gid'),
   );
-  
+
   return $schema;
 }
