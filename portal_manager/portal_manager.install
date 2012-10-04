@@ -83,7 +83,9 @@ function portal_manager_install() {
   menu_save($menu);
 
   // create directory for storing the games
-  drupal_mkdir('private://games/');
+  if (!drupal_realpath('private://games/')) {
+    drupal_mkdir('private://games/');
+  }
 }
 
 function portal_manager_schema() {
