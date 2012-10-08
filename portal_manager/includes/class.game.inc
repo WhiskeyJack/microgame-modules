@@ -19,6 +19,8 @@ class Game {
   private $updated_on;
   private $updated_by_uid;
   private $updated_by_name;
+  private $enabled;
+  private $weight;
   private $versions;
   private $last_version_id;
   private $new;
@@ -35,7 +37,7 @@ class Game {
     $this->saved = TRUE;
     return $this;
   }
-
+  
   function name() {
     return $this->name;
   }
@@ -130,6 +132,19 @@ class Game {
         $this->$key = $val;
       }
       $this->fetch_versions();
+    } else {
+      $this->gid = 0;
+    }
+  }
+  
+  protected function load_these_values($details, $fetchversions = FALSE) {
+     if ($details) {
+      foreach ($details as $key => $val) {
+        $this->$key = $val;
+      }
+      if ($fetchversions) {
+        $this->fetch_versions();
+      }
     } else {
       $this->gid = 0;
     }

@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Module file for portal statistics.
+ */
+
+function portal_games_permission() {
+  return array(
+      'play games' => array(
+          'title' => t('Play Microgame portal bames'),
+          'description' => t('Allow users to play the portal games'),
+      ),
+  );
+}
+
+function portal_games_menu() {
+  $items["portal/games"] = array(
+      'title' => 'games',
+      'description' => 'Games',
+      'access arguments' => array('play games'),
+      'page callback' => 'portal_games_page',
+      'file' => 'includes/page.games_home.inc',
+      'menu_name' => 'microgame_portal',
+      'weight' => 5,
+      'options' => array('attributes' => array('class' => array('mg_portal_menu', 'mg_portal_games'))),
+  );
+  
+  return $items;
+}

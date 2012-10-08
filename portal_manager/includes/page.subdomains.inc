@@ -35,11 +35,12 @@ function portal_subdomain_page() {
   $query->addField('u', 'name', 'created_by_name');
   $query->addField('v', 'name', 'updated_by_name');
   $query->addExpression('COUNT (sg.gid)', 'game_count');
+  $query->groupBy('m.sdid');
   $details = $query->extend('PagerDefault')->limit(10)->extend('TableSort')->orderByHeader($header)->execute()->fetchAssoc();
 
 //  /$query = db_select('microgame_subdomains', 'm')->fields('m')->extend('PagerDefault')->limit(10)->extend('TableSort')->orderByHeader($header);
   $result = $query->execute()->fetchallAssoc('sdid');
-
+$string =$query->__toString();
   $query = db_select('microgame_games', 'm');
   $query->fields('m', array('gid'));
   $query->addExpression('COUNT (m.gid)', 'game_count');

@@ -1,0 +1,6 @@
+name = Portal Games
+description = Shows and plays available games for a user
+package = Microgame Portal Modules
+core = 7.x
+
+dependencies[] = portal_manager

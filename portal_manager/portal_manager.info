@@ -6,3 +6,4 @@ core = 7.x
 files[] = portal_manager.module
 files[] = includes/class.subdomain.inc
 files[] = includes/class.game.inc
+files[] = includes/class.gamelist.inc

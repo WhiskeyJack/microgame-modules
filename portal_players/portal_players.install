@@ -4,13 +4,6 @@
  * Install, update and uninstall functions for the portal_players module.
  */
 
-/**
- * Implements hook_uninstall().
- */
-function portal_players_uninstall() {
-  variable_del('widgets_example_string');
-}
-
 function portal_players_install() {
 
   // super user account

@@ -1,0 +1,23 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the block_example module.
+ */
+
+function portal_games_install() {
+
+  // super user account
+  $result = db_query("SELECT rid FROM {role} where name like :id",array(':id' => 'administrator'));
+  $admin_rid = $result->fetchField(0);
+  user_role_change_permissions($admin_rid,  array('play games' => 1));
+
+  $role = user_role_load_by_name('portal manager');
+  user_role_change_permissions($role->rid,  array('play games' => 1));
+  
+   $role = user_role_load_by_name('group manager');
+   user_role_change_permissions($role->rid,  array('play games' => 1));
+   
+   $role = user_role_load_by_name('authenticated user');
+   user_role_change_permissions($role->rid,  array('play games' => 1));
+   
+}

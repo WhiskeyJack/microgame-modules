@@ -61,6 +61,26 @@ class Subdomain {
       
   }
 
+  function get_games($subdomain = ''){
+    global $user;
+    $games  = array();
+    if (empty($subdomain) || $subdomain == $this->name){
+      $subdomain = $this->id;
+    }
+    if (!is_numeric($subdomain)){
+      $subdomain = $this->name_exists($subdomain);
+    }
+    if (empty($subdomain) && ($user->uid ==1 || in_array('portal manager', $user->roles))) {
+      // main site and user is admin or portal manager => show all games
+     $gamelist = new GameList();
+     $games = $gamelist->games();
+    } elseif (!empty($subdomain)) {
+      $gamelist = new GameList($subdomain);
+      $games = $gamelist->games();
+    } 
+    return $games;
+  }
+  
   private function fetch_by_id($id) {
      return db_select('microgame_subdomains', 'm')->fields('m')->condition('sdid', $id, '=')->execute()->fetchAssoc();
   }

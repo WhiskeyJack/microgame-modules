@@ -3,12 +3,3 @@
  * @file
  * Install, update and uninstall functions for the block_example module.
  */
-
-/**
- * Implements hook_uninstall().
- *
- * @ingroup block_example
- */
-function portal_profile_uninstall() {
-  variable_del('widgets_example_string');
-}
