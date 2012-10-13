@@ -18,13 +18,43 @@ function portal_games_menu() {
   $items["portal/games"] = array(
       'title' => 'games',
       'description' => 'Games',
-      'access arguments' => array('play games'),
       'page callback' => 'portal_games_page',
+      'access callback' =>  user_is_logged_in(),
       'file' => 'includes/page.games_home.inc',
       'menu_name' => 'microgame_portal',
       'weight' => 5,
       'options' => array('attributes' => array('class' => array('mg_portal_menu', 'mg_portal_games'))),
   );
-  
+  $items["portal/game/%"] = array(
+      'title' => 'game page',
+      'description' => 'Game page',
+      'page callback' => 'portal_game_page',
+      'access callback' =>  user_is_logged_in(),
+      'file' => 'includes/page.game.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 10,
+  );
+    $items["portal/game/%portal_games_game/play"] = array(
+      'title' => 'game page',
+      'description' => 'Game page',
+      'page callback' => 'portal_game_play',
+      'page arguments' => array(2),
+      'access arguments' => array('play games'),
+      'file' => 'includes/page.game_play.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 10,
+  );
   return $items;
+}
+
+function portal_games_game_load($game_id) {
+  $game = new Game($game_id);  
+  if ($game->gid() == 0) {
+    return FALSE;
+  }
+  else {
+    return $game;
+  }
 }
