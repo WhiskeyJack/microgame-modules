@@ -14,7 +14,7 @@ function portal_games_page() {
   foreach ($games as $gid => $game) {
     $prefix =  $count == 0 ? '<div id="game_box">' : '';
     $suffix =  $count == count($games)-1 ? '</div>' : '';
-    $onclick = "location.href='/portal/games/{$game->gid()}'";
+    $onclick = "location.href='/portal/game/{$game->gid()}'";
     $output["game_box_{$gid}"] = array(
         '#type' => 'container',
         '#prefix' => $prefix,
