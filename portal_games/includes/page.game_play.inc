@@ -13,6 +13,8 @@ function portal_game_play($game) {
   $file = file_load($game->fid());
   $url = file_create_url($file->uri);
   
+  $game->config(1);
+  
   $install_text = t('Please install the Unity webplayer to play this game.');
   $a=1;
   

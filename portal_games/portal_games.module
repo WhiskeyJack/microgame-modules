@@ -8,7 +8,7 @@
 function portal_games_permission() {
   return array(
       'play games' => array(
-          'title' => t('Play Microgame portal bames'),
+          'title' => t('Play Microgame portal games'),
           'description' => t('Allow users to play the portal games'),
       ),
   );
@@ -25,10 +25,11 @@ function portal_games_menu() {
       'weight' => 5,
       'options' => array('attributes' => array('class' => array('mg_portal_menu', 'mg_portal_games'))),
   );
-  $items["portal/game/%"] = array(
+  $items["portal/game/%portal_games_game"] = array(
       'title' => 'game page',
       'description' => 'Game page',
       'page callback' => 'portal_game_page',
+      'page arguments' => array(2),
       'access callback' =>  user_is_logged_in(),
       'file' => 'includes/page.game.inc',
       'menu_name' => 'microgame_portal',

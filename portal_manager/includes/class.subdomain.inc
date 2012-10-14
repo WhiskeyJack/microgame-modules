@@ -63,7 +63,7 @@ class Subdomain {
 
   function get_games($subdomain = ''){
     global $user;
-    $games  = array();
+    //$games  = array();
     if (empty($subdomain) || $subdomain == $this->name){
       $subdomain = $this->id;
     }

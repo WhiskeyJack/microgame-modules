@@ -38,6 +38,7 @@ function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
     $gamelist[$gid] = $all_games[$gid];
     $gamelist[$gid]->weight = $game->weight;
     $gamelist[$gid]->enabled = $game->enabled;
+    $gamelist[$gid]->closebtn = $game->closebtn;
     unset($all_games[$gid]);
   }
 
@@ -59,7 +60,11 @@ function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
     if (!isset($item->enabled)) {
       $item->enabled = 1;
     }
+    if (!isset($item->closebtn)) {
+      $item->closebtn = 1;
+    }
 
+    
     $access = TRUE;
     if ($item->gid == 0) {
       $access = FALSE;
@@ -72,6 +77,11 @@ function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
         'enabled' => array(
             '#type' => 'checkbox',
             '#default_value' => $item->enabled,
+            '#access' => $access,
+        ),
+        'closebtn' => array(
+            '#type' => 'checkbox',
+            '#default_value' => $item->closebtn,
             '#access' => $access,
         ),
         'weight' => array(
@@ -112,6 +122,7 @@ function theme_subdomain_game_edit_form($variables) {
         'data' => array(
             drupal_render($form['game_items'][$id]['name']),
             drupal_render($form['game_items'][$id]['enabled']),
+            drupal_render($form['game_items'][$id]['closebtn']),
             drupal_render($form['game_items'][$id]['weight']),
         ),
         'class' => $draggable,
@@ -120,7 +131,7 @@ function theme_subdomain_game_edit_form($variables) {
 
   // We now define the table header values.  Ensure that the 'header' count
   // matches the final column count for your table.
-  $header = array(t('Name'), t('Enabled'), t('Weight'));
+  $header = array(t('Name'), t('Enabled'),t('Close Button'), t('Weight'));
 
   // We also need to pass the drupal_add_tabledrag() function an id which will
   // be used to identify the <table> element containing our tabledrag form.
@@ -160,6 +171,7 @@ function subdomain_game_edit_form_submit($form, &$form_state) {
                     'gid' => $gid,
                     'weight' => $val['weight'],
                     'enabled' => $val['enabled'],
+                    'closebtn' => $val['closebtn'],
                 ))
                 ->execute();
       }

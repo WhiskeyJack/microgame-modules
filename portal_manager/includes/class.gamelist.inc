@@ -7,7 +7,7 @@
 class GameList extends Game {
 
   private $sdid;
-  private $list;
+  public $list;
 
   function __construct($sdid = 0) {
     $this->sdid = 0;
@@ -24,7 +24,7 @@ class GameList extends Game {
     $query->join('users', 'v', 'm.updated_by_uid = v.uid');
     $query->join('users', 'v', 'm.updated_by_uid = v.uid');
     $query->fields('m');
-    $query->fields('msg', array('enabled', 'weight'));
+    $query->fields('msg', array('enabled', 'weight', 'closebtn'));
     $query->addField('u', 'name', 'created_by_name');
     $query->addField('v', 'name', 'updated_by_name');
     if ($sdid > 0) {

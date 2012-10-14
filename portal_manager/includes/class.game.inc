@@ -25,14 +25,19 @@ class Game {
   private $last_version_id;
   private $new;
   private $saved;
+  public $config;
 
-  function __construct($gid = 0) {
+  function __construct($gid = 0, $sdid = 0) {
     if ($gid == 0) {
       $this->gid = 0;
       $this->new_fid = 0;
+      $this->config = array();
       $this->new = TRUE;
     } else {
       $this->fetch_by_id($gid);
+      if ($this->gid > 0) {
+        $this->fetch_configuration($sdid);
+      }
     }
     $this->saved = TRUE;
     return $this;
@@ -98,6 +103,10 @@ class Game {
   function created_by_name() {
     return $this->created_by_name;
   }
+  
+  function enabled() {
+    return $this->enabled;
+  }
 
   private function fetch_by_id($id) {
     $query = db_select('microgame_games', 'm');
@@ -139,8 +148,23 @@ class Game {
   
   protected function load_these_values($details, $fetchversions = FALSE) {
      if ($details) {
+       $config = new stdClass();
       foreach ($details as $key => $val) {
-        $this->$key = $val;
+        if ($key == 'weight' || $key == 'closebtn'){
+          $config->gid = $details->gid;
+          $config->$key = $val;
+        } elseif ($key == 'enabled' ) {
+           $config->$key = (int)$val;
+           $this->$key = (int)$val;  
+        } else {
+          $this->$key = $val;
+        }
+      }
+      if (isset($config->gid)) {
+        $this->config = array(0=> $config);
+      }
+      if (!isset($this->enabled) || $this->enabled === null) {
+        $this->enabled = 1;
       }
       if ($fetchversions) {
         $this->fetch_versions();
@@ -261,6 +285,40 @@ class Game {
 
   function version_count() {
     return count($this->versions);
+  }
+  
+  protected function fetch_configuration($sdid) {
+    if ($sdid == 0) {
+      $config = new stdClass();
+      $config->sdid = 0;
+      $config->gid = $this->gid;
+      $config->enabled = 1;
+      $config->closebtn = 1;
+      $config->weight = 0;
+      $this->config = array(0 => $config);
+    } else {
+      $config = db_select('microgame_subdomain_games', 'm')
+          ->fields('m')
+          ->condition('sdid', $sdid, '=')
+          ->condition('gid', $this->gid, '=')    
+          ->execute()
+          ->fetchObject();
+      if ($config) {
+        $this->config = array($sdid => $config);
+      }
+    }
+  }
+  
+  function config($sdid) {
+    if (!array_key_exists($sdid, $this->config)) {
+      $this->fetch_configuration($sdid);
+    } else {
+      return $this->config[$sdid];
+    }
+    if (array_key_exists($sdid, $this->config)) {
+      return $this->config[$sdid];
+    }
+    return FALSE;
   }
 
 }
