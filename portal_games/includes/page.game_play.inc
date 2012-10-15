@@ -16,8 +16,7 @@ function portal_game_play($game) {
   $game->config(1);
   
   $install_text = t('Please install the Unity webplayer to play this game.');
-  $a=1;
-  
+
     $js = '<script>var params = {
 			backgroundcolor: "eaeaea",
 			bordercolor: "000000",
@@ -41,36 +40,3 @@ function portal_game_play($game) {
   );
   return $output;
 }
-
-/*
-  <html>
-	<body style="margin: 0;">
-		<div style="width:1024px;height:768px;">
-		  <script type="text/javascript" src="<?php echo $unity_url; ?>"></script>
-          <script type="text/javascript" src="/javascripts/unityObject.js"></script>
-          <script>
-		var params = {
-			backgroundcolor: "eaeaea",
-			bordercolor: "000000",
-			textcolor: "FFFFFF",
-			logoimage: "http://office.inthere.nl/microgame_small.png",
-			progressbarimage: "http://office.inthere.nl/ProgressBarPurple4.png",
-			progressframeimage: "http://office.inthere.nl/ProgressBarFrame.png"
-		};
-              var uniObj = new UnityObject("<?php echo $url; ?>", "unity", "1024", "768", "2");
-              //var uniObj = new UnityObject("<?=$_GET['bestand'];?>", "unity", "1024", "768", "2");
-              uniObj.setAttribute("altHTML", "Installeer de Unity web player om deze game te kunnen spelen.");
-		uniObj.addParam("logoimage", "../images/microgame_small.png");
-		uniObj.addParam("progressbarimage", "../images/ProgressBarPurple.png");
-		uniObj.addParam("progressframeimage", "../images/ProgressBarFrame.png");
-              uniObj.write();
-          </script>
-		</div>
-	</body>
-</html>
- 
-<?php
-}
-?>
- 
- */

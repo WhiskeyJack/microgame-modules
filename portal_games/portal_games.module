@@ -50,6 +50,38 @@ function portal_games_menu() {
   return $items;
 }
 
+function portal_games_file_download($uri, $field_type = 'file') {
+  //return if the user doesn't have access
+  if (!user_access('play games')) {
+    return;
+  }
+
+  // Get the file record based on the URI. If not in the database just return.
+  $files = file_load_multiple(array(), array('uri' => $uri));
+  if (count($files)) {
+    foreach ($files as $item) {
+      // Since some database servers sometimes use a case-insensitive comparison
+      // by default, double check that the filename is an exact match.
+      if ($item->uri === $uri) {
+        $file = $item;
+        break;
+      }
+    }
+  }
+  if (!isset($file)) {
+    return;
+  }
+
+  // rename file
+  //$file->filename = "game";
+
+  // File was found, and access is granted, return the header
+  $headers = file_get_content_headers($file);
+  return $headers;
+}
+
+
+
 function portal_games_game_load($game_id) {
   $game = new Game($game_id);  
   if ($game->gid() == 0) {
