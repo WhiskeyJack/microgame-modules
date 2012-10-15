@@ -266,7 +266,13 @@ function portal_manager_schema() {
           'enabled' => array(
               'description' => 'If the game is enabled or greyed out',
               'type' => 'int',
-              'length' => 4,
+              'size' => 'tiny',
+              'not null' => TRUE,
+          ),
+          'closebtn' => array(
+              'description' => 'If the overlay shows a close button',
+              'type' => 'int',
+              'size' => 'tiny',
               'not null' => TRUE,
           ),
       ),

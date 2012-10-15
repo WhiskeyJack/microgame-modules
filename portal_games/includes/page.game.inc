@@ -27,7 +27,9 @@ function portal_game_page($game) {
 
   $divwrapper = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array('game_play_btn'),)
+      '#attributes' => array('class' => array('game_play_btn'),),
+      '#prefix' => '<div id="gameinfo_box">',
+      '#suffix' => '</div>'
   );
   $divwrapper["game_{$game_id}"] = array('#markup' => '<p>' . t('Play') . '</p>');
   $output[] = $divwrapper;

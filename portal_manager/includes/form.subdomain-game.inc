@@ -6,7 +6,13 @@
  */
 function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
   menu_tree_set_path('microgame_portal', 'portal/admin');
-
+  
+  $breadcrumbs = array(
+      l(t('Home'), '<front>'),
+      l(t('Configuration'), 'portal/admin'),
+      l(t('Subdomains'), 'portal/admin/subdomains'),
+  );
+  drupal_set_breadcrumb($breadcrumbs);
   
   $arg = arg();
   $name = $arg[count($arg) - 2];

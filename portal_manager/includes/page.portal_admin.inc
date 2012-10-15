@@ -6,6 +6,11 @@
  */
 function portal_admin_page() {
  
+  $breadcrumbs = array(
+      l(t('Home'), '<front>')
+      );
+  drupal_set_breadcrumb($breadcrumbs);
+  
   if ( subdomain()->name() == '' ) {
     $options = array(l('Subdomains', 'portal/admin/subdomains/'), l('Games', 'portal/admin/games/'));
   }

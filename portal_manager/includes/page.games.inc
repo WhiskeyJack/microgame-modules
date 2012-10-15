@@ -5,6 +5,12 @@ function portal_games_page() {
 
   menu_tree_set_path('microgame_portal', 'portal/admin');
 
+  $breadcrumbs = array(
+      l(t('Home'), '<front>'),
+      l(t('Configuration'), 'portal/admin'),
+  );
+  drupal_set_breadcrumb($breadcrumbs);
+  
   // get all themes
   $all_themes = list_themes();
   $theme_list = array();

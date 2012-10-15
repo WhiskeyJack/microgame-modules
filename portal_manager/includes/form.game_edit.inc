@@ -7,6 +7,13 @@
 function game_edit_form($form, &$form_state, $gid = 0) {
   menu_tree_set_path('microgame_portal', 'portal/admin');
 
+  $breadcrumbs = array(
+      l(t('Home'), '<front>'),
+      l(t('Configuration'), 'portal/admin'),
+      l(t('Games'), 'portal/admin/games'),
+  );
+  drupal_set_breadcrumb($breadcrumbs);
+  
   $defaults = array('name' => '', 'description' => '', 'gid' => 0);
   
   $arg = arg();

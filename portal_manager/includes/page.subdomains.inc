@@ -7,6 +7,11 @@
 function portal_subdomain_page() {
 
   menu_tree_set_path('microgame_portal', 'portal/admin');
+  $breadcrumbs = array(
+      l(t('Home'), '<front>'),
+      l(t('Configuration'), 'portal/admin')
+  );
+  drupal_set_breadcrumb($breadcrumbs);
 
   // get all themes
   $all_themes = list_themes();
@@ -40,7 +45,7 @@ function portal_subdomain_page() {
 
 //  /$query = db_select('microgame_subdomains', 'm')->fields('m')->extend('PagerDefault')->limit(10)->extend('TableSort')->orderByHeader($header);
   $result = $query->execute()->fetchallAssoc('sdid');
-$string =$query->__toString();
+  $string = $query->__toString();
   $query = db_select('microgame_games', 'm');
   $query->fields('m', array('gid'));
   $query->addExpression('COUNT (m.gid)', 'game_count');
@@ -64,7 +69,7 @@ $string =$query->__toString();
     if ($gamecount > 0) {
       $gamelink = l(t('games'), "portal/admin/subdomains/{$row->name}/games/");
     } else {
-      $gamelink ='';
+      $gamelink = '';
     }
     $fields['edit'] = l(t('edit'), 'portal/admin/subdomains/edit/' . $row->name);
     $fields['games'] = $gamelink;
