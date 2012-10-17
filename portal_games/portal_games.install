@@ -1,23 +1,48 @@
 <?php
+
 /**
  * @file
  * Install, update and uninstall functions for the block_example module.
  */
+function portal_games_uninstall() {
+  user_role_delete('portal player');
+}
 
 function portal_games_install() {
 
   // super user account
-  $result = db_query("SELECT rid FROM {role} where name like :id",array(':id' => 'administrator'));
+  $result = db_query("SELECT rid FROM {role} where name like :id", array(':id' => 'administrator'));
   $admin_rid = $result->fetchField(0);
-  user_role_change_permissions($admin_rid,  array('play games' => 1));
+  user_role_change_permissions($admin_rid, array('play games' => 1));
 
   $role = user_role_load_by_name('portal manager');
-  user_role_change_permissions($role->rid,  array('play games' => 1));
+  user_role_change_permissions($role->rid, array('play games' => 1));
+
+  $role = user_role_load_by_name('group manager');
+  user_role_change_permissions($role->rid, array('play games' => 1));
+
+  // Role that allows playing games
+  $role = new stdClass();
+  $role->name = 'portal player';
+  // load the authenticated user role
+  $auth_role = user_role_load(DRUPAL_AUTHENTICATED_RID);
+  // Give the weight more than authenticate user, so that
+  // New role will have all the authenticated user permissions by default.
+  $role->weight = $auth_role->weight + 1;
+  user_role_save($role);
   
-   $role = user_role_load_by_name('group manager');
-   user_role_change_permissions($role->rid,  array('play games' => 1));
-   
-   $role = user_role_load_by_name('authenticated user');
-   user_role_change_permissions($role->rid,  array('play games' => 1));
-   
+  // fetch all permissions from db so we can check if attached module still exists
+  $permission_list = db_select('role_permission', 'r')->fields('r')->execute()->fetchallAssoc('permission');
+  
+  // check for each permission if the corresponding module is still enabled, if not, don't include it
+  $default_permissions = array();
+  
+  $auth_permissions = user_role_permissions(array(DRUPAL_AUTHENTICATED_RID => 'authenticated users'));
+  foreach ($auth_permissions[DRUPAL_AUTHENTICATED_RID] as $permission => $enabled) {
+    if (module_exists($permission_list[$permission]->module)) {
+      $default_permissions[$permission] = $enabled;
+    }
+  }
+  $new_permissions = $default_permissions + array('play games' => 1);
+  user_role_grant_permissions($role->rid, array_keys($new_permissions));
 }

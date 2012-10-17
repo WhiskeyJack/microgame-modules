@@ -25,6 +25,26 @@ function portal_manager_permission() {
   );
 }
 
+function portal_manager_init() {
+  global $user;
+  
+  // only do the access portal check for portal pages
+  if (!in_array('portal', arg())) {
+    return;
+  }
+  // check if the user has access to the domain we are on
+  // if it is a portal manager or admin, then everything goes
+  if (in_array('administrator', $user->roles) || in_array('portal manager', $user->roles) ) {
+    return;
+  }
+  // not an admin, so user needs to be a member of this group / subdomain
+  if (!array_key_exists(subdomain()->rid(), $user->roles) && current_path() != 'portal/noaccess'){
+    // user does not have the necessary role
+    drupal_goto ('portal/noaccess');
+  }
+  
+}
+
 function portal_manager_menu() {
     $items["portal/admin"] = array(
       'title' => 'configuration',
@@ -117,6 +137,26 @@ function portal_manager_menu() {
       'access arguments' => array('upload games'),
       'page callback' => 'portal_games_delete',
       'file' => 'includes/page.game_delete.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 15
+  );
+        $items["portal/noaccess"] = array(
+      'title' => 'No Acccess',
+      'description' => 'No access to this portal',
+      'access callback' => TRUE,
+      'page callback' => 'portal_noaccess_page',
+      'file' => 'includes/page.noaccess.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 15
+  );
+  $items["portal/login"] = array(
+      'title' => 'Please login',
+      'description' => 'Please login',
+      'access callback' => TRUE,
+      'page callback' => 'portal_login_page',
+      'file' => 'includes/page.login.inc',
       'menu_name' => 'microgame_portal',
       'type' => MENU_CALLBACK,
       'weight' => 15

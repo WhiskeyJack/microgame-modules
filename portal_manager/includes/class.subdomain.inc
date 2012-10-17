@@ -10,6 +10,7 @@ class Subdomain {
   private $name;
   private $group_name;
   private $theme_name;
+  private $rid;
   
 
   function __construct() {
@@ -20,6 +21,7 @@ class Subdomain {
     $this->name = $details['name'];
     $this->group_name = $details['group_name'];
     $this->theme_name = $details['theme_name'];
+   $this->rid = $details['rid'];
     $this->id = $details['sdid'];
   }
 
@@ -38,10 +40,14 @@ class Subdomain {
   function id() {
     return $this->id;
   }
+  
+  function rid() {
+    return $this->rid;
+  }
 
   function get_array($id = NULL) {
     if (is_null($id)){
-      return array('sdid' => $this->id, 'name' => $this->name, 'group_name' => $this->group_name, 'theme_name' => $this->theme_name);
+      return array('sdid' => $this->id, 'name' => $this->name, 'group_name' => $this->group_name, 'theme_name' => $this->theme_name, 'rid' => $this->rid);
     }
     $array =  is_numeric($id) ? $this->fetch_by_id($id) : $this->fetch_by_name($id);
     return $array;
@@ -63,7 +69,7 @@ class Subdomain {
 
   function get_games($subdomain = ''){
     global $user;
-    //$games  = array();
+    $games  = array();
     if (empty($subdomain) || $subdomain == $this->name){
       $subdomain = $this->id;
     }
