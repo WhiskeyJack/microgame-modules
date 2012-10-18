@@ -116,6 +116,12 @@ function portal_manager_schema() {
               'length' => 255,
               'not null' => TRUE,
           ),
+          'rid' => array(
+              'description' => 'Drupal role id',
+              'type' => 'int',
+              'length' => 10,
+              'not null' => TRUE,
+          ),
           'created_on' => array(
               'description' => 'Unix timestamp of creation',
               'type' => 'int',
