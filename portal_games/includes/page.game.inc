@@ -8,6 +8,8 @@ function portal_game_page($game) {
 
  menu_tree_set_path('microgame_portal', 'portal/games');
  
+  $test = new Game(3,1);
+ $a=1;
   $game_id = $game->gid();
   $mpath = drupal_get_path('module', 'portal_games');
   drupal_add_js($mpath . '/includes/fancybox/jquery.fancybox.pack.js', array('weight' => 1));

@@ -25,9 +25,13 @@ class Game {
   private $last_version_id;
   private $new;
   private $saved;
+  private $hash;
   public $config;
+  
+  
 
   function __construct($gid = 0, $sdid = 0) {
+    $this->hash = '';
     if ($gid == 0) {
       $this->gid = 0;
       $this->new_fid = 0;
@@ -305,6 +309,9 @@ class Game {
           ->fetchObject();
       if ($config) {
         $this->config = array($sdid => $config);
+      } else {
+        // no config found for given subdomain
+        $this->config = array(0 => $config);
       }
     }
   }
@@ -320,5 +327,37 @@ class Game {
     }
     return FALSE;
   }
-
+  
+  // generates a random string of 12 characters
+  private function random_hash() {
+   $this->hash = base_convert(mt_rand(0x1D39D3E06400000, 0x41C21CB8E0FFFFFF), 10, 36); 
+   return $this->hash;
+  }
+  
+  function hash() {
+      return $this->hash;
+  }
+  
+  function start_game($sdid){
+    if (!array_key_exists($sdid, $this->config)) {
+      $this->fetch_configuration($sdid);
+      if (!array_key_exists($sdid, $this->config)) {
+        return FALSE;
+      }
+    }
+    global $user;
+    $this->random_hash();
+    $this->gid = db_insert('microgame_game_active_sessions')
+              ->fields(array(
+                  'hash' => $this->hash,
+                  'gid' => $this->gid,
+                  'version_id' => $this->config[$sdid]->version_id,
+                  'sdid' =>$this->sdid,
+                  'created_by_uid' => $user->uid,
+                  'created_on' => REQUEST_TIME,
+              ))
+              ->execute();
+    // set cookie
+    setcookie('gr_session', $this->hash, time()+3600,'/');
+  }
 }

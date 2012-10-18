@@ -28,6 +28,7 @@ function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
   $query->addField('u', 'name', 'created_by_name');
   $query->addField('v', 'name', 'updated_by_name');
   $query->addExpression('COUNT (gv.version_id)', 'version_count');
+  $query->addExpression('GROUP_CONCAT (gv.version_id)', 'version_list');
   $query->groupBy('m.gid');
   $all_games = $query->orderBy('name', 'ASC')->execute()->fetchallAssoc('gid');
 
@@ -45,6 +46,7 @@ function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
     $gamelist[$gid]->weight = $game->weight;
     $gamelist[$gid]->enabled = $game->enabled;
     $gamelist[$gid]->closebtn = $game->closebtn;
+    $gamelist[$gid]->version_id = $game->version_id;
     unset($all_games[$gid]);
   }
 
@@ -69,16 +71,31 @@ function subdomain_game_edit_form($form, &$form_state, $subdomain = '') {
     if (!isset($item->closebtn)) {
       $item->closebtn = 1;
     }
+    if (!isset($item->version_id)) {
+      $item->version_id = 1;
+    }
 
     
+    
     $access = TRUE;
+    $versions = array();
     if ($item->gid == 0) {
       $access = FALSE;
+    } else {
+      foreach (explode(',', $item->version_list) as $versionid){
+        $versions[$versionid] = $versionid == $item->active_version ? $versionid . ' [default]' : $versionid;
+    }
     }
 
     $form['game_items'][$item->gid] = array(
         'name' => array(
             '#markup' => check_plain($item->name) . '&nbsp;&nbsp;',
+        ),
+        'version' => array(
+            '#type' => 'select',
+            '#default_value' => $item->version_id,
+            '#options' => $versions,
+            '#access' => $access,
         ),
         'enabled' => array(
             '#type' => 'checkbox',
@@ -127,6 +144,7 @@ function theme_subdomain_game_edit_form($variables) {
     $rows[] = array(
         'data' => array(
             drupal_render($form['game_items'][$id]['name']),
+            drupal_render($form['game_items'][$id]['version']),
             drupal_render($form['game_items'][$id]['enabled']),
             drupal_render($form['game_items'][$id]['closebtn']),
             drupal_render($form['game_items'][$id]['weight']),
@@ -137,7 +155,7 @@ function theme_subdomain_game_edit_form($variables) {
 
   // We now define the table header values.  Ensure that the 'header' count
   // matches the final column count for your table.
-  $header = array(t('Name'), t('Enabled'),t('Close Button'), t('Weight'));
+  $header = array(t('Name'),t('Version'), t('Enabled'),t('Close Button'), t('Weight'));
 
   // We also need to pass the drupal_add_tabledrag() function an id which will
   // be used to identify the <table> element containing our tabledrag form.
@@ -175,6 +193,7 @@ function subdomain_game_edit_form_submit($form, &$form_state) {
                 ->fields(array(
                     'sdid' => $sdid,
                     'gid' => $gid,
+                    'version_id' => $val['version'],
                     'weight' => $val['weight'],
                     'enabled' => $val['enabled'],
                     'closebtn' => $val['closebtn'],
