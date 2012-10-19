@@ -150,6 +150,7 @@ function portal_manager_schema() {
       'primary key' => array('sdid'),
       'unique_keys' => array('name'),
   );
+  
   $schema['microgame_games'] = array(
       'description' => 'Contains the available games',
       'fields' => array(
@@ -211,6 +212,7 @@ function portal_manager_schema() {
       'primary key' => array('gid'),
       'unique_keys' => array('name'),
   );
+  
   $schema['microgame_game_versions'] = array(
       'description' => 'Contains the available versions for each game',
       'fields' => array(
@@ -263,6 +265,12 @@ function portal_manager_schema() {
               'length' => 4,
               'not null' => TRUE,
           ),
+          'version_id' => array(
+              'description' => 'Version ID of the game',
+              'type' => 'int',
+              'length' => 4,
+              'not null' => TRUE,
+          ),
           'weight' => array(
               'description' => 'Weight or sortorder for displaying the games',
               'type' => 'int',
@@ -285,5 +293,48 @@ function portal_manager_schema() {
       'primary key' => array('sdid', 'gid'),
   );
 
+  $schema['microgame_game_active_sessions'] = array(
+      'description' => 'Contains the games made available for a subdomain',
+      'fields' => array(
+          'hash' => array(
+              'description' => 'Unique hash sent to client',
+              'type' => 'int',
+              'length' => 4,
+              'not null' => TRUE,
+          ),
+          'gid' => array(
+              'description' => 'Game ID',
+              'type' => 'int',
+              'length' => 4,
+              'not null' => TRUE,
+          ),
+          'version_id' => array(
+              'description' => 'Version ID of the game',
+              'type' => 'int',
+              'length' => 4,
+              'not null' => TRUE,
+          ),
+          'sdid' => array(
+              'description' => 'Subdomain ID',
+              'type' => 'int',
+              'length' => 4,
+              'not null' => TRUE,
+          ),
+          'created_by_uid' => array(
+              'description' => 'User ID of creator',
+              'type' => 'int',
+              'length' => 10,
+              'not null' => TRUE,
+          ),
+          'created_on' => array(
+              'description' => 'Unix timestamp of creation',
+              'type' => 'int',
+              'length' => 11,
+              'not null' => TRUE,
+          ),
+      ),
+      'primary key' => array('hash'),
+  );
+  
   return $schema;
 }
