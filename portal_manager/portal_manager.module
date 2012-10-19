@@ -223,3 +223,15 @@ function mg_string_to_filename($word) {
 function mg_game_name_exists($name) {
    return db_select('microgame_games', 'm')->fields('m', array('gid'))->condition('m.name', $name, '=')->execute()->fetchField();
 }
+
+global $mg_account;
+// will return the rendered field value without any markup
+function mg_render_field($fieldname) {
+  global $mg_account;
+  global $user;
+  if (!isset($mg_account)) {
+    $mg_account = entity_load('user', array($user->uid));
+  }
+  $val = field_view_value('user', $mg_account[$user->uid], $fieldname, $mg_account[$user->uid]->{$fieldname}['und'][0]);
+  return (render($val));
+}
