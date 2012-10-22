@@ -359,5 +359,6 @@ class Game {
               ->execute();
     // set cookie
     setcookie('gr_session', $this->hash, time()+3600,'/');
+    setcookie('gr_version', 2, time()+3600,'/');
   }
 }
