@@ -161,6 +161,16 @@ function portal_manager_menu() {
       'type' => MENU_CALLBACK,
       'weight' => 15
   );
+  $items["portal/validate"] = array(
+      'title' => 'Game data submit',
+      'description' => 'Validates submitted game data',
+      'access callback' => TRUE,
+      'page callback' => 'game_validate',
+      'file' => 'includes/page.validate.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 15
+  );
   return $items;
 }
 
