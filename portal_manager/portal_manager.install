@@ -184,6 +184,12 @@ function portal_manager_schema() {
               'length' => 10,
               'not null' => TRUE,
           ),
+          'custom_stats_count' => array(
+              'description' => 'Nr of custom stats columns for this game',
+              'type' => 'int',
+              'length' => 4,
+              'not null' => TRUE,
+          ),
           'created_on' => array(
               'description' => 'Unix timestamp of creation',
               'type' => 'int',
