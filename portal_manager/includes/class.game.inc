@@ -27,8 +27,6 @@ class Game {
   private $saved;
   private $hash;
   public $config;
-  
-  
 
   function __construct($gid = 0, $sdid = 0) {
     $this->hash = '';
@@ -46,7 +44,7 @@ class Game {
     $this->saved = TRUE;
     return $this;
   }
-  
+
   function name() {
     return $this->name;
   }
@@ -58,16 +56,16 @@ class Game {
   function version() {
     return $this->active_version;
   }
-  
+
   function version_list() {
     return $this->versions;
   }
-  
+
   function version_select_list() {
     $select = array();
     foreach ($this->versions as $id => $val) {
       $time = format_date($val->uploaded_on, 'short');
-      $select[$id] = "{$id} - {$val->created_by_name} - $time" ; 
+      $select[$id] = "{$id} - {$val->created_by_name} - $time";
     }
     return $select;
   }
@@ -95,7 +93,7 @@ class Game {
   function updated_by_name() {
     return $this->updated_by_name;
   }
-  
+
   function created_on() {
     return $this->created_on;
   }
@@ -103,11 +101,11 @@ class Game {
   function created_by_uid() {
     return $this->created_by_uid;
   }
-  
+
   function created_by_name() {
     return $this->created_by_name;
   }
-  
+
   function enabled() {
     return $this->enabled;
   }
@@ -149,23 +147,23 @@ class Game {
       $this->gid = 0;
     }
   }
-  
+
   protected function load_these_values($details, $fetchversions = FALSE) {
-     if ($details) {
-       $config = new stdClass();
+    if ($details) {
+      $config = new stdClass();
       foreach ($details as $key => $val) {
-        if ($key == 'weight' || $key == 'closebtn'){
+        if ($key == 'weight' || $key == 'closebtn') {
           $config->gid = $details->gid;
           $config->$key = $val;
-        } elseif ($key == 'enabled' ) {
-           $config->$key = (int)$val;
-           $this->$key = (int)$val;  
+        } elseif ($key == 'enabled') {
+          $config->$key = (int) $val;
+          $this->$key = (int) $val;
         } else {
           $this->$key = $val;
         }
       }
       if (isset($config->gid)) {
-        $this->config = array(0=> $config);
+        $this->config = array(0 => $config);
       }
       if (!isset($this->enabled) || $this->enabled === null) {
         $this->enabled = 1;
@@ -218,7 +216,7 @@ class Game {
     $this->saved = FALSE;
     return $this;
   }
-  
+
   function set_active($versionid) {
     if (array_key_exists($versionid, $this->versions)) {
       $this->active_version = $versionid;
@@ -290,7 +288,7 @@ class Game {
   function version_count() {
     return count($this->versions);
   }
-  
+
   protected function fetch_configuration($sdid) {
     if ($sdid == 0) {
       $config = new stdClass();
@@ -302,11 +300,11 @@ class Game {
       $this->config = array(0 => $config);
     } else {
       $config = db_select('microgame_subdomain_games', 'm')
-          ->fields('m')
-          ->condition('sdid', $sdid, '=')
-          ->condition('gid', $this->gid, '=')    
-          ->execute()
-          ->fetchObject();
+              ->fields('m')
+              ->condition('sdid', $sdid, '=')
+              ->condition('gid', $this->gid, '=')
+              ->execute()
+              ->fetchObject();
       if ($config) {
         $this->config = array($sdid => $config);
       } else {
@@ -315,7 +313,7 @@ class Game {
       }
     }
   }
-  
+
   function config($sdid) {
     if (!array_key_exists($sdid, $this->config)) {
       $this->fetch_configuration($sdid);
@@ -327,18 +325,18 @@ class Game {
     }
     return FALSE;
   }
-  
+
   // generates a random string of 12 characters
   private function random_hash() {
-   $this->hash = base_convert(mt_rand(0x1D39D3E06400000, 0x41C21CB8E0FFFFFF), 10, 36); 
-   return $this->hash;
+    $this->hash = base_convert(mt_rand(0x1D39D3E06400000, 0x41C21CB8E0FFFFFF), 10, 36);
+    return $this->hash;
   }
-  
+
   function hash() {
-      return $this->hash;
+    return $this->hash;
   }
-  
-  function start_game($sdid){
+
+  function start_game($sdid) {
     if (!array_key_exists($sdid, $this->config)) {
       $this->fetch_configuration($sdid);
       if (!array_key_exists($sdid, $this->config)) {
@@ -348,17 +346,80 @@ class Game {
     global $user;
     $this->random_hash();
     $this->gid = db_insert('microgame_game_active_sessions')
-              ->fields(array(
-                  'hash' => $this->hash,
-                  'gid' => $this->gid,
-                  'version_id' => $this->config[$sdid]->version_id,
-                  'sdid' =>$this->sdid,
-                  'created_by_uid' => $user->uid,
-                  'created_on' => REQUEST_TIME,
-              ))
-              ->execute();
+            ->fields(array(
+                'hash' => $this->hash,
+                'gid' => $this->gid,
+                'version_id' => $this->config[$sdid]->version_id,
+                'sdid' => $this->sdid,
+                'created_by_uid' => $user->uid,
+                'created_on' => REQUEST_TIME,
+            ))
+            ->execute();
     // set cookie
-    setcookie('gr_session', $this->hash, time()+3600,'/');
-    setcookie('gr_version', 2, time()+3600,'/');
+    setcookie('gr_session', $this->hash, time() + 3600, '/');
+    setcookie('gr_version', 2, time() + 3600, '/');
   }
+
+  private function create_stats_table($columns, $description) {
+    $schema = array();
+    $tablename = 'microgame_game_stats_' . $this->gid;
+    if (!db_table_exists($tablename)) {
+      $schema[$tablename] = array(
+          'description' => 'Contains the custom stats for game ' . $this->name
+      );
+      $fields = array();
+      $fields['gsid'] = array(
+          'description' => $description[$key],
+          'type' => 'int',
+          'not null' => TRUE
+      );
+      foreach ($columns as $key => $type) {
+        if ($type == 'bool') {
+          $fields[$key] = array(
+              'description' => $description[$key],
+              'type' => 'int',
+              'size' => 'tiny',
+              'not null' => TRUE
+          );
+        } elseif ($type == 'string') {
+          $fields[$key] = array(
+              'description' => $description[$key],
+              'type' => 'varchar',
+              'size' => '50',
+              'not null' => TRUE
+          );
+        } else {
+          $fields[$key] = array(
+              'description' => $description[$key],
+              'type' => $type,
+              'not null' => TRUE
+          );
+        }
+      }
+      $schema[$tablename]['fields'] = $fields;
+      $schema[$tablename]['primary key'] = array('gsid');
+      db_create_table($tablename, $schema);
+    }
+  }
+
 }
+
+/*
+   * 
+    CREATE TABLE IF NOT EXISTS `microgame_game_active_sessions` (
+    `gsid` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Game Session ID',
+    `hash` char(12) NOT NULL,
+    `gsid_related` int(11) NOT NULL DEFAULT '0' COMMENT 'related game session id',
+    `gid` int(11) NOT NULL,
+    `version_id` int(11) NOT NULL,
+    `sdid` int(11) NOT NULL,
+    `created_by_uid` int(11) NOT NULL,
+    `created_on` int(11) NOT NULL,
+    `difficulty` tinyint(4) NOT NULL DEFAULT '0',
+    `score` int(11) NOT NULL DEFAULT '0',
+    `gametime` int(11) NOT NULL DEFAULT '0',
+    `timesplayed` int(11) NOT NULL DEFAULT '0',
+    `submitted_on` int(11) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`gsid`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+   */
