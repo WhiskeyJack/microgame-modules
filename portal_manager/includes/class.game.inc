@@ -26,6 +26,7 @@ class Game {
   private $new;
   private $saved;
   private $hash;
+  private $gsid_array;  // contains the db row for a given hash 
   public $config;
 
   function __construct($gid = 0, $sdid = 0) {
@@ -43,6 +44,17 @@ class Game {
     }
     $this->saved = TRUE;
     return $this;
+  }
+  
+  function from_hash($hash) {
+    $query = db_select('microgame_game_active_sessions', 'm');
+    $query->fields('m');
+    $query->condition('m.hash', $hash, '=');
+    $query->condition('m.submitted_on', 0, '=');
+    $this->gsid_array = $query->execute()->fetchAssoc();
+    
+    $this->fetch_by_id($this->gsid_array['gid']);
+    $this->fetch_configuration($this->gsid_array['sdid']);   
   }
 
   function name() {
@@ -350,7 +362,7 @@ class Game {
                 'hash' => $this->hash,
                 'gid' => $this->gid,
                 'version_id' => $this->config[$sdid]->version_id,
-                'sdid' => $this->sdid,
+                'sdid' => $sdid,
                 'created_by_uid' => $user->uid,
                 'created_on' => REQUEST_TIME,
             ))
@@ -358,6 +370,11 @@ class Game {
     // set cookie
     setcookie('gr_session', $this->hash, time() + 3600, '/');
     setcookie('gr_version', 2, time() + 3600, '/');
+  }
+  
+  function save_stats($json) {
+    $this->create_stats_table($json->customtypes, $json->customdescr);
+    
   }
 
   private function create_stats_table($columns, $description) {
@@ -369,36 +386,39 @@ class Game {
       );
       $fields = array();
       $fields['gsid'] = array(
-          'description' => $description[$key],
+          'description' => 'game session id',
           'type' => 'int',
           'not null' => TRUE
       );
       foreach ($columns as $key => $type) {
         if ($type == 'bool') {
           $fields[$key] = array(
-              'description' => $description[$key],
+              'description' => $description->$key,
               'type' => 'int',
               'size' => 'tiny',
+              'default' => 0,
               'not null' => TRUE
           );
         } elseif ($type == 'string') {
           $fields[$key] = array(
-              'description' => $description[$key],
+              'description' => $description->$key,
               'type' => 'varchar',
               'size' => '50',
+              'default' => '',
               'not null' => TRUE
           );
         } else {
           $fields[$key] = array(
-              'description' => $description[$key],
+              'description' => $description->$key,
               'type' => $type,
+              'default' => 0,
               'not null' => TRUE
           );
         }
       }
       $schema[$tablename]['fields'] = $fields;
       $schema[$tablename]['primary key'] = array('gsid');
-      db_create_table($tablename, $schema);
+      db_create_table($tablename, $schema[$tablename]);
     }
   }
 

@@ -5,6 +5,7 @@
  */
 function portal_game_play($game) {
   
+  $sdid = subdomain()->id();
   $mpath = drupal_get_path('module', 'portal_games');
   drupal_add_js($mpath . '/includes/js/unityObject.js', array('weight' => 1));
   
@@ -13,7 +14,7 @@ function portal_game_play($game) {
   $file = file_load($game->fid());
   $url = file_create_url($file->uri);
   
-  $game->config(1);
+  $game->start_game($sdid);
   
   $install_text = t('Please install the Unity webplayer to play this game.');
 
@@ -38,5 +39,6 @@ function portal_game_play($game) {
           '#markup' => $js,
       ),
   );
+  
   return $output;
 }
