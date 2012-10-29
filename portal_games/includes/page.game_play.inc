@@ -18,19 +18,24 @@ function portal_game_play($game) {
   
   $install_text = t('Please install the Unity webplayer to play this game.');
 
+  $imagedir= path_to_theme() . '/images/unityloader/';
+  $logo = $imagedir . 'microgame_small.png';
+  $bar = $imagedir . 'ProgressBarPurple.png';
+  $frame = $imagedir . 'ProgressBarFrame.png';
+  
     $js = '<script>var params = {
 			backgroundcolor: "eaeaea",
 			bordercolor: "000000",
 			textcolor: "FFFFFF",
-			logoimage: "http://office.inthere.nl/microgame_small.png",
-			progressbarimage: "http://office.inthere.nl/ProgressBarPurple4.png",
-			progressframeimage: "http://office.inthere.nl/ProgressBarFrame.png"
+			logoimage: ' . $logo . ',
+			progressbarimage: ' . $bar . ',
+			progressframeimage: ' . $frame . '
 		};
               var uniObj = new UnityObject("' . $url . '", "unity", "1024", "768", "2");
               uniObj.setAttribute("altHTML", "' . $install_text . '");
-		uniObj.addParam("logoimage", "../images/microgame_small.png");
-		uniObj.addParam("progressbarimage", "../images/ProgressBarPurple.png");
-		uniObj.addParam("progressframeimage", "../images/ProgressBarFrame.png");
+		uniObj.addParam("logoimage", "' . $logo . '");
+		uniObj.addParam("progressbarimage", "' . $bar . '");
+		uniObj.addParam("progressframeimage", "' . $frame . '");
               uniObj.write();</script> ';
   
   $output = array(
