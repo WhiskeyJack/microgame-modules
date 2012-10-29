@@ -301,7 +301,7 @@ function portal_manager_schema() {
   );
 
   $schema['microgame_game_sessions'] = array(
-      'description' => 'Contains the games made available for a subdomain',
+      'description' => 'Contains the sessions created for playing games',
       'fields' => array(
          'gsid' => array(
               'description' => 'Game Session ID',
@@ -364,7 +364,7 @@ function portal_manager_schema() {
               'not null' => TRUE,
           ),
           'timesplayed' => array(
-              'description' => 'Earlier continues number sessions',
+              'description' => 'Earlier continued number sessions',
               'type' => 'int',
               'size' => 4,
               'not null' => TRUE,
