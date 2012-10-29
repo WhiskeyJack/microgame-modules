@@ -19,9 +19,11 @@ function portal_game_play($game) {
   $install_text = t('Please install the Unity webplayer to play this game.');
 
   $imagedir= path_to_theme() . '/images/unityloader/';
-  $logo = $imagedir . 'microgame_small.png';
-  $bar = $imagedir . 'ProgressBarPurple.png';
-  $frame = $imagedir . 'ProgressBarFrame.png';
+  $logo = url($imagedir . 'microgame_small.png', array('absolute' => TRUE));
+  $bar = url($imagedir . 'ProgressBarPurple.png', array('absolute' => TRUE));
+  $frame = url($imagedir . 'ProgressBarFrame.png', array('absolute' => TRUE));
+  
+  //mg_debug(url($frame, array('absolute' => TRUE)));
   
     $js = '<script>var params = {
 			backgroundcolor: "eaeaea",
