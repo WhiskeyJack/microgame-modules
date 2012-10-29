@@ -354,19 +354,19 @@ function portal_manager_schema() {
           'difficulty' => array(
               'description' => 'Difficulty level of the game for this session',
               'type' => 'int',
-              'size' => 'tiny',
+              'length' => 'tiny',
               'not null' => TRUE,
           ),
           'score' => array(
               'description' => 'Score for this session',
               'type' => 'int',
-              'size' => 10,
+              'length' => 10,
               'not null' => TRUE,
           ),
           'timesplayed' => array(
               'description' => 'Earlier continued number sessions',
               'type' => 'int',
-              'size' => 4,
+              'length' => 4,
               'not null' => TRUE,
           ),
           'submitted_on' => array(
