@@ -419,7 +419,11 @@ class Game {
 // custom
     $fields = array('gsid' => $this->gsid_array['gsid']);
     foreach ($json->customdata as $key => $val) {
-      $fields[$key] = $val;
+      if ($json->customtypes->key == 'bool') {
+        $fields[$key] = strtolower($val) == 'true' ? 1 : 0;
+      } else {
+        $fields[$key] = $val;
+      }
     }
     db_insert('microgame_game_stats_' . $this->gsid_array['gid'])
             ->fields($fields)
