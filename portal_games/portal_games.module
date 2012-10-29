@@ -91,3 +91,16 @@ function portal_games_game_load($game_id) {
     return $game;
   }
 }
+
+function mg_debug($message) {
+  $filename = "debug.log";
+  $dir = drupal_get_path('module', 'portal_manager') . '/debug/';
+    if (!$handle = fopen($dir . $filename, 'a')) {
+      drupal_set_message("Cannot open debug log \"{$dir}{$filename}", 'error');
+  }
+  $message = "=== " . date(DATE_RFC822) . " ===\n{$message}\n\n\n";
+    if (fwrite($handle, $message) === FALSE) {
+       drupal_set_message("Cannot write to debug log \"{$dir}{$filename}", 'error');
+    }
+    fclose($handle);
+  }

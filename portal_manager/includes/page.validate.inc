@@ -26,10 +26,13 @@ function game_validate() {
     $encrypted = iconv('UTF-16', 'UTF-8', $encrypted);
     // decrypt the cleaned data
     $decrypted = mg_decrypt($key, $iv, $encrypted);
+    mg_debug($decrypted);
     // parse the decrypted json data
     $json = json_decode($decrypted);
   }
 
+  mg_debug(json_encode($json));
+  
   $game = new Game();
   $game->save_stats($json);
 
