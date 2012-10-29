@@ -395,7 +395,7 @@ class Game {
     if (!isset($this->gsid_array['gsid'])) {
       $query = db_select('microgame_game_sessions', 'm');
       $query->fields('m');
-      $query->condition('m.hash', $hash, '=');
+      $query->condition('m.hash', $json->generics->hash, '=');
       $query->condition('m.submitted_on', 0, '=');
       $this->gsid_array = $query->execute()->fetchAssoc();
     }
@@ -454,7 +454,7 @@ class Game {
           $fields[$key] = array(
               'description' => $description->$key,
               'type' => 'varchar',
-              'size' => '50',
+              'length' => '50',
               'default' => '',
               'not null' => TRUE
           );
@@ -467,8 +467,10 @@ class Game {
           );
         }
       }
+      
       $schema[$tablename]['fields'] = $fields;
       $schema[$tablename]['primary key'] = array('gsid');
+      drupal_set_message(print_r($schema[$tablename], 1));
       db_create_table($tablename, $schema[$tablename]);
       $this->custom_stats_count = $count;
       $this->update_stats_count();

@@ -18,6 +18,10 @@ function game_validate() {
 
     // Get encrypted dat from gzipfile
     $encrypted = mg_gzfile_get_contents($_FILES['data']['tmp_name']);
+    if (!$encrypted) {
+      return;
+    }
+    
     // convert/clean data in correct encoding
     $encrypted = iconv('UTF-16', 'UTF-8', $encrypted);
     // decrypt the cleaned data
@@ -113,6 +117,7 @@ function create_test_game_session($sdid) {
   $customdata->timeDomus = "67.59272";
   $customdata->cardsViewed = "112";
   $customdata->cardsFound = "13";
+  $customdata->testString= "test";
 
   $customtypes = new stdClass();
   $customtypes->requestedCards = "int";
@@ -120,13 +125,15 @@ function create_test_game_session($sdid) {
   $customtypes->timeDomus = "float";
   $customtypes->cardsViewed = "int";
   $customtypes->cardsFound = "int";
+  $customtypes->testString= "string";
 
   $customdescr = new stdClass();
   $customdescr->requestedCards = "Total requested cards";
   $customdescr->timeTraditional = "Total search time on the traditional table";
   $customdescr->timeDomus = "Total search time on the Domus table";
   $customdescr->cardsViewed = "The total number of cards viewed while searching";
-  $customdescr->cardsFound = "inThe total number of cards requested by the cowboy";
+  $customdescr->cardsFound = "The total number of cards requested by the cowboy";
+  $customdescr->testString= "";
 
   $json = new stdClass();
   $json->generics = $generics;
