@@ -319,6 +319,7 @@ function portal_manager_schema() {
               'description' => 'Related Game Session ID',
               'type' => 'int',
               'length' => 10,
+              'default' => 0,
               'not null' => TRUE,
           ),
           'gid' => array(
@@ -355,24 +356,28 @@ function portal_manager_schema() {
               'description' => 'Difficulty level of the game for this session',
               'type' => 'int',
               'length' => 'tiny',
+              'default' => 0,
               'not null' => TRUE,
           ),
           'score' => array(
               'description' => 'Score for this session',
               'type' => 'int',
               'length' => 10,
+              'default' => 0,
               'not null' => TRUE,
           ),
           'timesplayed' => array(
               'description' => 'Earlier continued number sessions',
               'type' => 'int',
               'length' => 4,
+              'default' => 0,
               'not null' => TRUE,
           ),
           'submitted_on' => array(
               'description' => 'Unix timestamp of submit time',
               'type' => 'int',
               'length' => 11,
+              'default' => 0,
               'not null' => TRUE,
           )
       ),
