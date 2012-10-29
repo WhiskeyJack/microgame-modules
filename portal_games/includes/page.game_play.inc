@@ -27,9 +27,9 @@ function portal_game_play($game) {
 			backgroundcolor: "eaeaea",
 			bordercolor: "000000",
 			textcolor: "FFFFFF",
-			logoimage: ' . $logo . ',
-			progressbarimage: ' . $bar . ',
-			progressframeimage: ' . $frame . '
+			logoimage: "' . $logo . '",
+			progressbarimage: "' . $bar . '",
+			progressframeimage: "' . $frame . '"
 		};
               var uniObj = new UnityObject("' . $url . '", "unity", "1024", "768", "2");
               uniObj.setAttribute("altHTML", "' . $install_text . '");
