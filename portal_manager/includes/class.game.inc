@@ -419,7 +419,7 @@ class Game {
 // custom
     $fields = array('gsid' => $this->gsid_array['gsid']);
     foreach ($json->customdata as $key => $val) {
-      if ($key == 'bool') {
+      if ($json->customtypes->$key == 'bool') {
         $fields[$key] = strtolower($val) == 'true' ? 1 : 0;
       } else {
         $fields[$key] = $val;
