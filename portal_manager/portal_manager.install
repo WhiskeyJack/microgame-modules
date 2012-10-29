@@ -305,7 +305,7 @@ function portal_manager_schema() {
       'fields' => array(
          'gsid' => array(
               'description' => 'Game Session ID',
-              'type' => 'int',
+              'type' => 'serial',
               'length' => 10,
               'not null' => TRUE,
           ),
