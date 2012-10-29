@@ -26,7 +26,8 @@ class Game {
   private $new;
   private $saved;
   private $hash;
-  private $gsid_array;  // contains the db row for a given hash 
+  private $custom_stats_count;
+  private $gsid_array;  // contains the db row with the session for a given hash 
   public $config;
 
   function __construct($gid = 0, $sdid = 0) {
@@ -45,16 +46,15 @@ class Game {
     $this->saved = TRUE;
     return $this;
   }
-  
+
   function from_hash($hash) {
-    $query = db_select('microgame_game_active_sessions', 'm');
+    $query = db_select('microgame_game_sessions', 'm');
     $query->fields('m');
     $query->condition('m.hash', $hash, '=');
     $query->condition('m.submitted_on', 0, '=');
     $this->gsid_array = $query->execute()->fetchAssoc();
-    
     $this->fetch_by_id($this->gsid_array['gid']);
-    $this->fetch_configuration($this->gsid_array['sdid']);   
+    $this->fetch_configuration($this->gsid_array['sdid']);
   }
 
   function name() {
@@ -71,6 +71,10 @@ class Game {
 
   function version_list() {
     return $this->versions;
+  }
+
+  function custom_stats_count() {
+    return $this->custom_stats_count;
   }
 
   function version_select_list() {
@@ -357,7 +361,7 @@ class Game {
     }
     global $user;
     $this->random_hash();
-    $this->gid = db_insert('microgame_game_active_sessions')
+    $this->gid = db_insert('microgame_game_sessions')
             ->fields(array(
                 'hash' => $this->hash,
                 'gid' => $this->gid,
@@ -371,10 +375,55 @@ class Game {
     setcookie('gr_session', $this->hash, time() + 3600, '/');
     setcookie('gr_version', 2, time() + 3600, '/');
   }
-  
+
   function save_stats($json) {
-    $this->create_stats_table($json->customtypes, $json->customdescr);
+
+    if ($this->gid == 0) {
+      // first initialize
+      $this->from_hash($json->generics->hash);
+    }
     
+    if ($this->custom_stats_count == 0) {
+      // no stats table yet in db for this game, create one
+      $this->create_stats_table($json->customtypes, $json->customdescr);
+    } elseif ($this->custom_stats_count < (count((array) $json->customtypes) - 1)) {
+      // more stats submitted than will be available in the table, add the missing columns
+      $this->add_stats_column($json->customtypes, $json->customdescr);
+    }
+
+    // now save the stats, first find the gsid (game session id)
+    if (!isset($this->gsid_array['gsid'])) {
+      $query = db_select('microgame_game_sessions', 'm');
+      $query->fields('m');
+      $query->condition('m.hash', $hash, '=');
+      $query->condition('m.submitted_on', 0, '=');
+      $this->gsid_array = $query->execute()->fetchAssoc();
+    }
+    if (!isset($this->gsid_array['gsid'])) {
+      // no match found, return
+      return;
+    }
+
+    // generics
+    db_update('microgame_game_sessions')
+            ->fields(array(
+                'difficulty' => $json->generics->difficulty,
+                'score' => $json->generics->score,
+                'gametime' => $json->generics->gametime,
+                'timesplayed' => $json->generics->timesplayed,
+                'submitted_on' => REQUEST_TIME
+            ))
+            ->condition('gsid', $this->gsid_array['gsid'], '=')
+            ->execute();
+    
+// custom
+    $fields = array('gsid' => $this->gsid_array['gsid']);
+    foreach ($json->customdata as $key => $val) {
+      $fields[$key] = $val;
+    }
+    db_insert('microgame_game_stats_' . $this->gsid_array['gid'])
+            ->fields($fields)
+            ->execute();
   }
 
   private function create_stats_table($columns, $description) {
@@ -382,7 +431,7 @@ class Game {
     $tablename = 'microgame_game_stats_' . $this->gid;
     if (!db_table_exists($tablename)) {
       $schema[$tablename] = array(
-          'description' => 'Contains the custom stats for game ' . $this->name
+          'description' => "Contains the custom stats for game {$this->gid} ({$this->name})"
       );
       $fields = array();
       $fields['gsid'] = array(
@@ -390,7 +439,9 @@ class Game {
           'type' => 'int',
           'not null' => TRUE
       );
+      $count = 0;
       foreach ($columns as $key => $type) {
+        $count++;
         if ($type == 'bool') {
           $fields[$key] = array(
               'description' => $description->$key,
@@ -419,14 +470,25 @@ class Game {
       $schema[$tablename]['fields'] = $fields;
       $schema[$tablename]['primary key'] = array('gsid');
       db_create_table($tablename, $schema[$tablename]);
+      $this->custom_stats_count = $count;
+      $this->update_stats_count();
     }
+  }
+
+  private function update_stats_count() {
+    db_update('microgame_games')
+            ->fields(array(
+                'custom_stats_count' => $this->custom_stats_count
+            ))
+            ->condition('gid', $this->gid, '=')
+            ->execute();
   }
 
 }
 
 /*
    * 
-    CREATE TABLE IF NOT EXISTS `microgame_game_active_sessions` (
+    CREATE TABLE IF NOT EXISTS `microgame_game_sessions` (
     `gsid` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Game Session ID',
     `hash` char(12) NOT NULL,
     `gsid_related` int(11) NOT NULL DEFAULT '0' COMMENT 'related game session id',

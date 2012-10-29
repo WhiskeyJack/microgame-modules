@@ -21,7 +21,7 @@ class Subdomain {
     $this->name = $details['name'];
     $this->group_name = $details['group_name'];
     $this->theme_name = $details['theme_name'];
-   $this->rid = $details['rid'];
+    $this->rid = $details['rid'];
     $this->id = $details['sdid'];
   }
 

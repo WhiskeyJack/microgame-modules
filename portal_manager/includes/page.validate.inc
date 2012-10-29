@@ -5,34 +5,32 @@
  * Content for no access page
  */
 function game_validate() {
-  $allow_test = TRUE;
-  
+  $allow_test = FALSE;
+
   $sdid = subdomain()->id();
-  
+
   // see if we're testing or not
-  if ($allow_test  && isset($_GET['t']) &&  $_GET['t'] == 1) {
+  if ($allow_test && isset($_GET['t']) && $_GET['t'] == 1) {
     $json = create_test_game_session($sdid);
   } else {
-  $key = "xZh6a60B96wJUxUlxADnorfO4zCxqbhPep1F4UaSDCp=";
-  $iv = "XpVkbVGR1eaTiE6bisbJxGFetBMcKWH8PUiLIRpTTK6=";
+    $key = "xZh6a60B96wJUxUlxADnorfO4zCxqbhPep1F4UaSDCp=";
+    $iv = "XpVkbVGR1eaTiE6bisbJxGFetBMcKWH8PUiLIRpTTK6=";
 
-  // Get encrypted dat from gzipfile
-  $encrypted = mg_gzfile_get_contents($_FILES['data']['tmp_name']);
-  // convert/clean data in correct encoding
-  $encrypted = iconv('UTF-16', 'UTF-8', $encrypted);
-  // decrypt the cleaned data
-  $decrypted = mg_decrypt($key, $iv, $encrypted);
-  // parse the decrypted json data
-  $json = json_decode($decrypted);
+    // Get encrypted dat from gzipfile
+    $encrypted = mg_gzfile_get_contents($_FILES['data']['tmp_name']);
+    // convert/clean data in correct encoding
+    $encrypted = iconv('UTF-16', 'UTF-8', $encrypted);
+    // decrypt the cleaned data
+    $decrypted = mg_decrypt($key, $iv, $encrypted);
+    // parse the decrypted json data
+    $json = json_decode($decrypted);
   }
 
   $game = new Game();
-  $game->from_hash($json->generics->hash);
   $game->save_stats($json);
-  
-  
-// don't return anything
 
+
+// don't return anything
 }
 
 function mg_gzfile_get_contents($filename, $use_include_path = 0) {
@@ -81,63 +79,62 @@ function mg_decrypt($key, $iv, $string = "") {
   return mg_strippadding(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $string, MCRYPT_MODE_CBC, $iv));
 }
 
-function create_test_game_session ($sdid) {
-    $currentgames = db_select('microgame_subdomain_games', 'm')
+function create_test_game_session($sdid) {
+  $currentgames = db_select('microgame_subdomain_games', 'm')
           ->fields('m')
           ->condition('sdid', $sdid)
           ->condition('enabled', 1)
           ->orderBy('weight', 'ASC')
           ->execute()
           ->fetchallAssoc('gid');
-    
-    $pick = array_shift($currentgames);
-    
-    $game = new Game($pick->gid, $sdid);
-    $game->start_game($sdid);
-    
-    $hash = $_COOKIE['gr_session'];
-    $version = $_COOKIE['gr_version'];
-    
-    
-    
-    $generics = new stdClass();
-    $generics->hash = $hash;
-    $generics->difficulty = 1;
-    $generics->score = 123;
-    $generics->gametime = 23;
-    $generics->timesplayed = 0;
-    
-    $customdata = new stdClass();
-    $customdata->requestedCards = "13";
-    $customdata->timeTraditional = "46.90109";
-    $customdata->timeDomus = "67.59272";
-    $customdata->cardsViewed = "112";
-    $customdata->cardsFound = "13";
-    
-    $customtypes = new stdClass();
-    $customtypes->requestedCards = "int";
-    $customtypes->timeTraditional = "float";
-    $customtypes->timeDomus = "float";
-    $customtypes->cardsViewed = "int";
-    $customtypes->cardsFound = "int";
-    
-    $customdescr = new stdClass();
-    $customdescr->requestedCards = "Total requested cards";
-    $customdescr->timeTraditional = "Total search time on the traditional table";
-    $customdescr->timeDomus = "Total search time on the Domus table";
-    $customdescr->cardsViewed = "The total number of cards viewed while searching";
-    $customdescr->cardsFound = "inThe total number of cards requested by the cowboy";
-    
-    $json = new stdClass();
-    $json->generics = $generics;
-    $json->customdata = $customdata;
-    $json->customtypes = $customtypes;
-    $json->customdescr = $customdescr;
-    
-    return $json;
-    
-  
-  
+
+  $pick = array_shift($currentgames);
+
+  $game = new Game($pick->gid, $sdid);
+  $game->start_game($sdid);
+
+  // Doesn't work, probably too slow
+  //$hash = $_COOKIE['gr_session'];
+  //$version = $_COOKIE['gr_version'];
+
+  $hash = $game->hash();
+
+
+  $generics = new stdClass();
+  $generics->hash = $hash;
+  $generics->difficulty = 1;
+  $generics->score = 123;
+  $generics->gametime = 23;
+  $generics->timesplayed = 0;
+
+  $customdata = new stdClass();
+  $customdata->requestedCards = "13";
+  $customdata->timeTraditional = "46.90109";
+  $customdata->timeDomus = "67.59272";
+  $customdata->cardsViewed = "112";
+  $customdata->cardsFound = "13";
+
+  $customtypes = new stdClass();
+  $customtypes->requestedCards = "int";
+  $customtypes->timeTraditional = "float";
+  $customtypes->timeDomus = "float";
+  $customtypes->cardsViewed = "int";
+  $customtypes->cardsFound = "int";
+
+  $customdescr = new stdClass();
+  $customdescr->requestedCards = "Total requested cards";
+  $customdescr->timeTraditional = "Total search time on the traditional table";
+  $customdescr->timeDomus = "Total search time on the Domus table";
+  $customdescr->cardsViewed = "The total number of cards viewed while searching";
+  $customdescr->cardsFound = "inThe total number of cards requested by the cowboy";
+
+  $json = new stdClass();
+  $json->generics = $generics;
+  $json->customdata = $customdata;
+  $json->customtypes = $customtypes;
+  $json->customdescr = $customdescr;
+
+  return $json;
 }
 
 /*

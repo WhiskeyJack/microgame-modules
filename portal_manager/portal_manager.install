@@ -188,6 +188,7 @@ function portal_manager_schema() {
               'description' => 'Nr of custom stats columns for this game',
               'type' => 'int',
               'length' => 4,
+              'default' => 0,
               'not null' => TRUE,
           ),
           'created_on' => array(
@@ -299,13 +300,25 @@ function portal_manager_schema() {
       'primary key' => array('sdid', 'gid'),
   );
 
-  $schema['microgame_game_active_sessions'] = array(
+  $schema['microgame_game_sessions'] = array(
       'description' => 'Contains the games made available for a subdomain',
       'fields' => array(
+         'gsid' => array(
+              'description' => 'Game Session ID',
+              'type' => 'int',
+              'length' => 10,
+              'not null' => TRUE,
+          ),
           'hash' => array(
               'description' => 'Unique hash sent to client',
+              'type' => 'char',
+              'length' => 12,
+              'not null' => TRUE,
+          ),
+          'gsid_related' => array(
+              'description' => 'Related Game Session ID',
               'type' => 'int',
-              'length' => 4,
+              'length' => 10,
               'not null' => TRUE,
           ),
           'gid' => array(
@@ -338,8 +351,32 @@ function portal_manager_schema() {
               'length' => 11,
               'not null' => TRUE,
           ),
+          'difficulty' => array(
+              'description' => 'Difficulty level of the game for this session',
+              'type' => 'int',
+              'size' => 'tiny',
+              'not null' => TRUE,
+          ),
+          'score' => array(
+              'description' => 'Score for this session',
+              'type' => 'int',
+              'size' => 10,
+              'not null' => TRUE,
+          ),
+          'timesplayed' => array(
+              'description' => 'Earlier continues number sessions',
+              'type' => 'int',
+              'size' => 4,
+              'not null' => TRUE,
+          ),
+          'submitted_on' => array(
+              'description' => 'Unix timestamp of submit time',
+              'type' => 'int',
+              'length' => 11,
+              'not null' => TRUE,
+          )
       ),
-      'primary key' => array('hash'),
+      'primary key' => array('gsid'),
   );
   
   return $schema;
