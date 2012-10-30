@@ -26,7 +26,7 @@ function game_validate() {
     $encrypted = iconv('UTF-16', 'UTF-8', $encrypted);
     // decrypt the cleaned data
     $decrypted = mg_decrypt($key, $iv, $encrypted);
-    mg_debug($decrypted);
+   // mg_debug($decrypted);
     // parse the decrypted json data
     $json = json_decode($decrypted);
   }
@@ -144,7 +144,7 @@ function create_test_game_session($sdid) {
 
   $msg = '{"generics":{"hash":"%hash%","difficulty":1,"score":0,"gametime":2,"timesplayed":1},"customdata":{"TotalClickCount":"0","MissedCickCount":"0","LikesGame":"True","teststring1":"bladiebla1","teststring2":"bladiebla2","teststring3":"bladiebla3","testboolean1":"Fals","testint1":"123","testint2":"456","testint3":"789","testfloat1":"1.23","testfloat2":"4.56","testfloat3":"7"},"customtypes":{"TotalClckCount":"int","MissedClickCount":"int","LikesGame":"bool","teststring1":"string","teststring2":"string","teststring3":"string","testbolean1":"bool","testint1":"int","testint2":"int","testint3":"int","testfloat1":"float","testfloat2":"float","testfloat3":"float"},"cusomdescr":{"TotalClickCount":"The total click count","MissedClickCount":"The missed click count","LikesGame":"","teststring1":"","testsring2":"","teststring3":"","testboolean1":"","testint1":"","testint2":"","testint3":"","testfloat1":"","testfloat2":"","testfloat3":""}';
   //$msg = str_replace("%hash%", $hash, $msg);
-  mg_debug($msg);
+  // ($msg);
   $json = json_decode($msg);
   
   
