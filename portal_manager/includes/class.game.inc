@@ -382,7 +382,7 @@ class Game {
       // first initialize
       $this->from_hash($json->generics->hash);
     }
-    
+
     if ($this->custom_stats_count == 0) {
       // no stats table yet in db for this game, create one
       $this->create_stats_table($json->customtypes, $json->customdescr);
@@ -415,7 +415,7 @@ class Game {
             ))
             ->condition('gsid', $this->gsid_array['gsid'], '=')
             ->execute();
-    
+
 // custom
     $fields = array('gsid' => $this->gsid_array['gsid']);
     foreach ($json->customdata as $key => $val) {
@@ -471,7 +471,7 @@ class Game {
           );
         }
       }
-      
+
       $schema[$tablename]['fields'] = $fields;
       $schema[$tablename]['primary key'] = array('gsid');
       db_create_table($tablename, $schema[$tablename]);
@@ -487,6 +487,43 @@ class Game {
             ))
             ->condition('gid', $this->gid, '=')
             ->execute();
+  }
+
+  function new_hash($currenthash) {
+
+    if ($this->gid == 0) {
+      // first initialize
+      $this->from_hash($currenthash);
+    }
+
+    global $user;
+    // get new hash
+    $this->random_hash();
+    // insert new game session
+    $gsid_related = $this->gsid_array['gsid_related'] == 0 ? $this->gsid_array['gsid'] : $this->gsid_array['gsid_related'];
+    $this->gid = db_insert('microgame_game_sessions')
+            ->fields(array(
+                'hash' => $this->hash,
+                'gid' => $this->gid,
+                'gsid_related' => $gsid_related,
+                'version_id' => $this->gsid_array['version_id'],
+                'sdid' => $this->gsid_array['sdid'],
+                'created_by_uid' => $user->uid,
+                'created_on' => REQUEST_TIME,
+            ))
+            ->execute();
+
+    // update previous game session gsid_related for easier querying
+    if ($this->gsid_array['gsid_related'] == 0) {
+      db_update('microgame_game_sessions')
+              ->fields(array(
+                  'gsid_related' => $gsid_related,
+              ))
+              ->condition('gsid', $gsid_related, '=')
+              ->execute();
+    }
+
+    return $this->hash;
   }
 
 }

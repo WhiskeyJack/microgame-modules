@@ -171,6 +171,16 @@ function portal_manager_menu() {
       'type' => MENU_CALLBACK,
       'weight' => 15
   );
+  $items["portal/newhash"] = array(
+      'title' => 'Generate new hash',
+      'description' => 'Generate new hash',
+      'access callback' => TRUE,
+      'page callback' => 'game_new_hash',
+      'file' => 'includes/page.newhash.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 15
+  );
   return $items;
 }
 

@@ -19,7 +19,8 @@ function game_validate() {
     // Get encrypted dat from gzipfile
     $encrypted = mg_gzfile_get_contents($_FILES['data']['tmp_name']);
     if (!$encrypted) {
-      return;
+      // don't return, just exit
+      exit();
     }
     
     // convert/clean data in correct encoding
