@@ -474,7 +474,6 @@ class Game {
       
       $schema[$tablename]['fields'] = $fields;
       $schema[$tablename]['primary key'] = array('gsid');
-      drupal_set_message(print_r($schema[$tablename], 1));
       db_create_table($tablename, $schema[$tablename]);
       $this->custom_stats_count = $count;
       $this->update_stats_count();
