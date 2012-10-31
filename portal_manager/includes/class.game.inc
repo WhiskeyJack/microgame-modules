@@ -47,11 +47,23 @@ class Game {
     return $this;
   }
 
-  function from_hash($hash) {
+  /**
+   * Loads the game object from a given hash
+   * If $submitted is true, a hash is searched for which a score
+   * has been submitted.
+   * @param type $hash
+   * @param type $submitted
+   */
+  function from_hash($hash, $submitted = FALSE) {
     $query = db_select('microgame_game_sessions', 'm');
     $query->fields('m');
     $query->condition('m.hash', $hash, '=');
-    $query->condition('m.submitted_on', 0, '=');
+    if ($submitted) {
+      $query->condition('m.submitted_on', 0, '<>');
+    } else {
+      $query->condition('m.submitted_on', 0, '=');
+    }
+    $query->orderBy('m.submitted_on', 'DESC');
     $this->gsid_array = $query->execute()->fetchAssoc();
     $this->fetch_by_id($this->gsid_array['gid']);
     $this->fetch_configuration($this->gsid_array['sdid']);
@@ -493,7 +505,7 @@ class Game {
 
     if ($this->gid == 0) {
       // first initialize
-      $this->from_hash($currenthash);
+      $this->from_hash($currenthash, TRUE);
     }
 
     global $user;
