@@ -184,6 +184,13 @@ function portal_manager_schema() {
               'length' => 10,
               'not null' => TRUE,
           ),
+          'youtube_id' => array(
+              'description' => 'Youtube ID with tutorial movie',
+              'type' => 'varchar',
+              'length' => 12,
+              'not null' => TRUE,
+              'default' => '',
+          ),
           'custom_stats_count' => array(
               'description' => 'Nr of custom stats columns for this game',
               'type' => 'int',

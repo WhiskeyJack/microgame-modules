@@ -5,6 +5,12 @@ function portal_games_page() {
 
   menu_tree_set_path('microgame_portal', 'portal/admin');
 
+  $mpath = drupal_get_path('module', 'portal_games');
+  drupal_add_js($mpath . '/includes/fancybox/jquery.fancybox.pack.js', array('weight' => 1));
+
+  drupal_add_css($mpath . '/includes/fancybox/jquery.fancybox.css', array('weight' => 1));
+  drupal_add_js($mpath . '/includes/js/youtube_modal.js', array('weight' => 1));
+  
   $breadcrumbs = array(
       l(t('Home'), '<front>'),
       l(t('Configuration'), 'portal/admin'),
@@ -21,7 +27,8 @@ function portal_games_page() {
   $header = array(
       array('data' => t('ID'), 'field' => 'gid', 'sort' => 'desc'),
       array('data' => t('Name'), 'field' => 'name', 'class' => array('mg_center')),
-      array('data' => t('Active version'), 'field' => 'active_version'),
+      array('data' => t('Youtube'), 'field' => 'youtube_id', 'class' => array('mg_center')),
+      array('data' => t('Active version'), 'field' => 'active_version', 'class' => array('mg_center')),
       array('data' => t('Versions'), 'field' => 'version_count'),
       array('data' => t('Subdomains'), 'field' => 'subdomain_count'),
       array('data' => t('Created by'), 'field' => 'created_by_name', 'class' => array('mg_center')),
@@ -51,7 +58,11 @@ function portal_games_page() {
         $fields[$col['field']] = array('data' => format_date($row->$col['field'], 'short'), 'class' => array('mg_center'));
       } elseif ($col['field'] == 'gid' || $col['field'] == 'active_version' || $col['field'] == 'version_count' || $col['field'] == 'subdomain_count' ) {
         $fields[$col['field']] = array('data' => $row->$col['field'], 'class' => array('mg_center'));
-      } else {
+      } elseif ($col['field'] == 'youtube_id') {
+         $fields[$col['field']] = array(
+             'data' => "<a class=\"fancybox fancybox.iframe\" href=\"http://www.youtube.com/v/{$row->$col['field']}?autoplay=1\">{$row->$col['field']}</a>", 
+                     'class' => array('mg_center'));
+      }else {
         $fields[$col['field']] = $row->$col['field'];
       }
     }

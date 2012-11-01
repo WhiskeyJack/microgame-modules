@@ -14,7 +14,7 @@ function game_edit_form($form, &$form_state, $gid = 0) {
   );
   drupal_set_breadcrumb($breadcrumbs);
   
-  $defaults = array('name' => '', 'description' => '', 'gid' => 0);
+  $defaults = array('name' => '', 'description' => '', 'gid' => 0, 'youtube_id' => '');
   
   $arg = arg();
   if ($arg[count($arg)-2] == 'edit' ) {
@@ -22,7 +22,12 @@ function game_edit_form($form, &$form_state, $gid = 0) {
     $gid = end($arg);
     $game = new Game($gid);
     if ($game->gid() != 0) {
-      $defaults = array('name' => $game->name(), 'description' => $game->description(), 'gid' => $game->gid());
+      $defaults = array(
+          'name' => $game->name(), 
+          'description' => $game->description(), 
+          'gid' => $game->gid(),
+          'youtube_id' => $game->youtube_id()
+              );
       $form['lastedit'] = array(
           '#type' => 'item',
           '#markup' => t('This game was last edited on @date by @user.', array('@date' => format_date($game->updated_on()), '@user' => $game->updated_by_name()))
@@ -56,7 +61,18 @@ function game_edit_form($form, &$form_state, $gid = 0) {
       '#required' => TRUE,
       '#default_value' => $defaults['description'],
   );
-
+  
+  $form['youtube_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Youtube video ID'),
+      '#description' => t('The 11 character youtube identifier (found after "v="  in the youtube url)'),
+      '#size' => 12,
+      '#maxlength' => 11,
+      '#required' => FALSE,
+      '#default_value' => $defaults['youtube_id'],
+      '#element_validate' => array('mg_is_valid_youtube_id'),
+  );
+  
   if ($defaults['gid'] != 0 ) {
     $form['active_version'] = array(
       '#type' => 'select',
@@ -138,7 +154,7 @@ function game_edit_form_submit($form, &$form_state) {
   if ($form_state['values']['gid'] == 0) {
     // new game
     $game = new Game();
-    $gid = $game->new_game( $form_state['values']['game_name'], $form_state['values']['game_description'], $form_state['values']['fid'])->save()->gid();
+    $gid = $game->new_game( $form_state['values']['game_name'], $form_state['values']['game_description'], $form_state['values']['fid'],  $form_state['values']['youtube_id'])->save()->gid();
     drupal_set_message(t('The game has been uploaded with game id @game_id.', array('@game_id' => $gid)));
   } else {
     // update existing game
@@ -147,7 +163,7 @@ function game_edit_form_submit($form, &$form_state) {
     if (isset($form_state['values']['active_version'])) {
       $game->set_active($form_state['values']['active_version']);
     }
-    $gid = $game->update_game( $form_state['values']['game_name'], $form_state['values']['game_description'], $form_state['values']['fid'] , $make_active)
+    $gid = $game->update_game( $form_state['values']['game_name'], $form_state['values']['game_description'], $form_state['values']['fid'],  $form_state['values']['youtube_id'], $make_active)
             ->save()->gid();
     if ($game->version_count() == 1) {
       drupal_set_message(t('The game with game id @game_id has been updated, there is  now 1 version available.',
@@ -173,6 +189,17 @@ function mg_is_valid_game_name($element, &$form_state) {
   }
   else if ($form_state['values']['gid'] == 0 && $exists_id != 0) {
     form_error($element, t('The specified game name already exists for another game.'));
+  }
+}
+
+function mg_is_valid_youtube_id($element, &$form_state) {
+  if (strlen($element['#value']) != 11 ) {
+    form_error($element, t('The specified Youtube video ID must be 11 characters'));
+    return;
+  }
+  if (preg_match('/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-]/', $element['#value'])) {
+    form_error($element, t('The specified Youtube video ID contains invalid characters'));
+    return;
   }
 }
 

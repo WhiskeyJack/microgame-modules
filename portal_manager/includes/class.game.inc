@@ -11,6 +11,7 @@ class Game {
   private $description;
   private $active_version;
   private $active_fid;
+  private $youtube_id;
   private $new_version;
   private $new_fid;
   private $created_on;
@@ -110,6 +111,10 @@ class Game {
     return $this->active_fid;
   }
 
+  function youtube_id() {
+    return $this->youtube_id;
+  }
+  
   function updated_on() {
     return $this->updated_on;
   }
@@ -216,11 +221,12 @@ class Game {
   }
 
   // creates a new game object
-  function new_game($name, $description, $fid) {
+  function new_game($name, $description, $fid, $youtube_id) {
     $this->name = $name;
     $this->description = $description;
     $this->active_version = 1;
     $this->active_fid = $fid;
+    $this->youtube_id = $youtube_id;
     $this->new_version = 1;
     $this->new_fid = $fid;
     $this->saved = FALSE;
@@ -228,10 +234,11 @@ class Game {
     return $this;
   }
 
-  function update_game($name, $description, $fid = 0, $makeactive = FALSE) {
+  function update_game($name, $description, $fid = 0, $youtube_id = '', $makeactive = FALSE) {
     $this->name = $name;
     $this->description = $description;
     $this->new_version = 1;
+    $this->youtube_id = $youtube_id;
     if ($fid != 0) {
       $this->new_fid = $fid;
       $this->new_version = $this->last_version_id + 1;
@@ -263,6 +270,7 @@ class Game {
                   'description' => $this->description,
                   'active_version' => $this->active_version,
                   'active_fid' => $this->active_fid,
+                  'youtube_id' => $this->youtube_id,
                   'created_by_uid' => $user->uid,
                   'updated_by_uid' => $user->uid,
                   'created_on' => REQUEST_TIME,
@@ -287,6 +295,7 @@ class Game {
                   'description' => $this->description,
                   'active_version' => $this->active_version,
                   'active_fid' => $this->active_fid,
+                  'youtube_id' => $this->youtube_id,
                   'updated_by_uid' => $user->uid,
                   'updated_on' => REQUEST_TIME,
               ))
