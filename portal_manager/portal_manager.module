@@ -46,6 +46,7 @@ function portal_manager_init() {
 }
 
 function portal_manager_menu() {
+  global $user;
     $items["portal/admin"] = array(
       'title' => 'configuration',
       'description' => 'Microgame portal configuration',
@@ -141,6 +142,18 @@ function portal_manager_menu() {
       'type' => MENU_CALLBACK,
       'weight' => 15
   );
+      $items["portal/admin/testdata"] = array(
+      'title' => 'Testdata for game stats',
+      'description' => 'Testdata for game stats',
+      'access callback' => in_array('administrator', $user->roles),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('testdata_form'),
+      'file' => 'includes/form.testdata.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 9
+  );
+      
         $items["portal/noaccess"] = array(
       'title' => 'No Acccess',
       'description' => 'No access to this portal',
