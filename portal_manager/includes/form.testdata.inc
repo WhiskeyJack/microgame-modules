@@ -12,9 +12,31 @@ function testdata_form($form, &$form_state, $gid = 0) {
       l(t('Configuration'), 'portal/admin'),
   );
   drupal_set_breadcrumb($breadcrumbs);
-  
-  $defaults = array('name' => '', 'description' => '', 'gid' => 0, 'youtube_id' => '');
-  
+
+  $query = db_select('microgame_subdomains', 'm');
+  $query->join('users', 'u', 'm.created_by_uid = u.uid');
+  $query->join('users', 'v', 'm.updated_by_uid = v.uid');
+  $query->leftJoin('microgame_subdomain_games', 'sg', 'm.sdid = sg.sdid');
+  $query->fields('m');
+  $query->addField('u', 'name', 'created_by_name');
+  $query->addField('v', 'name', 'updated_by_name');
+  $query->addExpression('COUNT (sg.gid)', 'game_count');
+  $query->groupBy('m.sdid');
+  //$details = $query->extend('PagerDefault')->limit(10)->extend('TableSort')->orderByHeader($header);
+  $sdlist = $query->execute()->fetchallAssoc('sdid');
+
+  $subdomains = array();
+  foreach ($sdlist as $sd) {
+    $subdomains[$sd->sdid] = "{$sd->name} ({$sd->game_count} games)";
+  }
+
+  $form['subdomains'] = array(
+      '#type' => 'checkboxes',
+      '#options' => $subdomains,
+      '#title' => t('Subdomains'),
+      '#description' => t('Subdomains for which the testdata is generated')
+  );
+
   $form['min_per_day'] = array(
       '#type' => 'textfield',
       '#title' => t('Minimum score submits per day'),
@@ -24,7 +46,7 @@ function testdata_form($form, &$form_state, $gid = 0) {
       '#required' => TRUE,
       '#default_value' => 50,
   );
-  
+
   $form['max_per_day'] = array(
       '#type' => 'textfield',
       '#title' => t('Maximum score submits per day'),
@@ -34,60 +56,60 @@ function testdata_form($form, &$form_state, $gid = 0) {
       '#required' => TRUE,
       '#default_value' => 5000,
   );
-  // we generate random values according to buckets
-  // each bucket is a time period in hours that has a chance for generating a value
-  // the size of the bucket is determined by the hours it encompasses
-  // the chance for a value is determined by the chance given and the size of the bucket
-  // we then generate random values between 0 and the total bucket size
-  // the value determines which bucket is lucky
-  // we then draw another random value from that bucket
-  
-  // create list of buckets by start hour for timestamp generation
-  // this generates buckets for 0-2 hours, 2-7 hours etc
-  $bucketlist = array(0,2,7,9,12,15,22);
-  $chance = array(5,3,15,18,24,25,10);
-  $count = count($bucketlist);
-  
-  // generate buckets
-  // each bucket "to" is the size (next in bucketlist -current bucketlist entry) * chance it has + previous buckets
-  $buckets = array();
-  for ($i=0; $i < $count; $i++) {    
-    $buckets[$i]['from'] = $bucketlist[$i];
-    $buckets[$i]['to'] = $i == $count-1 ? 24 : $bucketlist[$i+1];
-    $buckets[$i]['fromsize'] = $i == 0 ? 0 : $buckets[$i-1]['tosize'];
-    $buckets[$i]['tosize'] = ($buckets[$i]['to'] - $bucketlist[$i]) * ($chance[$i]/100) + $buckets[$i]['fromsize'] ;
-    //$buckets[$i]['size'] = $buckets[$i]['tosize'] - $buckets[$i]['fromsize'];
-  }
-  $total_bucket_size = $buckets[$i-1]['tosize'];
-  
-//  foreach ($buckets as $b ) {
-//    $output .= "{$b['from']}-{$b['to']} - {$b['size']}<br>";
-//  }
-  
-  $output =  '';
-  for ($i=0; $i < 1000; $i++) {
-    // generate a random float between 0 and total bucket size
-    $rand = mt_rand(0,$total_bucket_size*100)/100;
-    // find the lucky bucket
-    foreach ($buckets as $b){
-      if ($rand <= $b['tosize']) {
-         // generate a random number of minutes within bucket range
-        $total_minute_range = ($b['to'] - $b['from']) *60;
-        $b_rand = mt_rand(0,$total_minute_range);
-        // convert minutes back to hour/minutes on 24h clock
-        $hour = $b['from'] + floor ($b_rand/60);
-        $minutes = $b_rand % 60;
-        break;
-      }
-    }
 
-    $output .= "{$hour}:{$minutes}<br>" ;
-  }
-  
-  $form['test'] = array(
-      '#markup' => $output
+  $form['min_session'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum number of times played in succession'),
+      '#description' => t('If zero, also records will be created without a score submit'),
+      '#size' => 1,
+      '#maxlength' => 1,
+      '#required' => TRUE,
+      '#default_value' => 0,
   );
-  
+
+  $form['max_session'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum number of times played in succession'),
+      '#description' => t('Maximum number of times played in succession'),
+      '#size' => 2,
+      '#maxlength' => 2,
+      '#required' => TRUE,
+      '#default_value' => 8,
+  );
+
+  $form['min_score'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum score'),
+      '#description' => t('Minimum score that will be used'),
+      '#size' => 1,
+      '#maxlength' => 1,
+      '#required' => TRUE,
+      '#default_value' => 0,
+  );
+
+  $form['max_score'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum score'),
+      '#description' => t('Maximum score that will be used'),
+      '#size' => 4,
+      '#maxlength' => 4,
+      '#required' => TRUE,
+      '#default_value' => 1000,
+  );
+
+  $form['start_date'] = array(
+      '#type' => 'date',
+      '#title' => t('Start date for score submissions'),
+      '#description' => t('First date from which the score submits will be generated.'),
+      '#required' => TRUE,
+  );
+  $form['end_date'] = array(
+      '#type' => 'date',
+      '#title' => t('End date for score submissions'),
+      '#description' => t('End date to which the score submits will be generated.'),
+      '#required' => TRUE,
+  );
+
   $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Submit'),
@@ -96,19 +118,228 @@ function testdata_form($form, &$form_state, $gid = 0) {
   return $form;
 }
 
+function testdata_form_validate($form, &$form_state) {
 
+  $sdfound = FALSE;
+  foreach ($form_state['values']['subdomains'] as $sd) {
+    if ($sd > 0) {
+      $sdfound = TRUE;
+      break;
+    }
+  }
 
+  if (!$sdfound) {
+    form_set_error('subdomains', t('At least one subdomain must be selected'));
+  }
+  $a = 1;
+}
 
+function testdata_form_submit($form, &$form_state) {
 
+  $insert_count = 0;
+  $day_count = 1;
+  // 1 day in seconds
+  $daysec = 24 * 60 * 60;
 
+  // start & end timestamp
+  $start_date = $form_state['values']['start_date'];
+  $end_date = $form_state['values']['end_date'];
+  $start_ts = mktime(0, 0, 0, $start_date['month'], $start_date['day'], $start_date['year']);
+  $end_ts = mktime(0, 0, 0, $end_date['month'], $end_date['day'], $end_date['year']);
 
+  // get list of subdomains to use
+  $sdlist = array();
+  foreach ($form_state['values']['subdomains'] as $sd) {
+    if ($sd > 0) {
+      $sdlist[$sd] = $sd;
+    }
+  }
 
+  // get role for each subdomain
+  $subdomains = db_select('microgame_subdomains', 'm')
+          ->fields('m')
+          ->execute()
+          ->fetchallAssoc('sdid');
+  $roleslist = array();
+  foreach ($sdlist as $sd) {
+    $roleslist[$sd] = $subdomains[$sd]->rid;
+  }
 
+  // get list of games to use
+  $gamelist = array();
+  foreach ($sdlist as $sd) {
+    $currentgames = db_select('microgame_subdomain_games', 'm')
+            ->fields('m')
+            ->condition('sdid', $sd)
+            ->execute()
+            ->fetchallAssoc('sdid');
+    $gamelist[$sd] = $currentgames;
+  }
+
+  // get list of users to use, bit ugly (lots of mem usage)
+  $userlist = array();
+  foreach ($sdlist as $sd) {
+    $users = db_select('users_roles', 'u')
+            ->fields('u')
+            ->condition('rid', $roleslist[$sd], '=')
+            ->execute()
+            ->fetchallAssoc('uid');
+    $userlist[$sd] = $users;
+  }
+  // min submits per day
+  $min_submits_day = $form_state['values']['min_per_day'];
+  $max_submits_day = $form_state['values']['max_per_day'];
+
+  // get the buckets
+  $bucketlist = array(0, 2, 7, 9, 12, 15, 22);
+  $chancelist = array(5, 3, 15, 18, 24, 25, 10);
+  $buckets = buckets($bucketlist, $chancelist);
+  $total_bucket_size = $buckets[count($buckets) - 1]['tosize'];
+
+  // get nr of submits for this day
+  $daysubmits = mt_rand($min_submits_day, $max_submits_day);
+
+  $this_day_ts = $start_ts;
+  $session_count = -1;
+  while ($this_day_ts <= $end_ts) {
+
+    // generate timestamp values for this day
+    for ($i = 0; $i < $daysubmits; $i++) {
+      // get a timestamp for this day
+      $ts = $this_day_ts + get_timestamp($buckets, $total_bucket_size);
+
+      // check if we need a new session count, 50% will be 1 play sessions
+      if ($session_count < 0) {
+        if (mt_rand(0,1) == 1) {
+          $session_count = mt_rand($form_state['values']['min_session'], $form_state['values']['max_session']);
+        } else {
+          $session_count = 0;
+        }
+        // related gsid
+        $gsid_related = 0;
+              // timesplayed
+      $timesplayed = 1;
+        $new_session = TRUE;
+      }
+
+      // get a subdomain
+      $sd = array_rand($sdlist);
+      // get a game
+      $game = array_rand($gamelist[$sd]);
+      //
+      $version_id = $gamelist[$sd][$game]->version_id;
+      // difficulty
+      $difficulty = 1;
+      // score
+      $score = mt_rand($form_state['values']['min_score'], $form_state['values']['max_score']);
+      // gametime
+      $gametime = mt_rand(60, 600);
+
+      // submitted on
+      $submitted_on = $ts + $gametime;
+      // userid
+      $userid = array_rand($userlist[$sd]);
+
+      // create db record for this timestamp
+      $gsid = db_insert('microgame_game_sessions')
+              ->fields(array(
+                  'hash' => base_convert(mt_rand(0x1D39D3E06400000, 0x41C21CB8E0FFFFFF), 10, 36),
+                  'gid' => $game,
+                  'gsid_related' => $gsid_related,
+                  'version_id' => $version_id,
+                  'sdid' => $sd,
+                  'created_by_uid' => $userid,
+                  'created_on' => $ts,
+                  'difficulty' => $difficulty,
+                  'score' => $score,
+                  'gametime' => $gametime,
+                  'timesplayed' => $timesplayed,
+                  'submitted_on' => $submitted_on
+              ))
+              ->execute();
+
+      if ($new_session && $session_count > 0) {
+        // update gsid_related
+        $gsid_related = $gsid;
+        db_update('microgame_game_sessions')
+                ->fields(array(
+                    'gsid_related' => $gsid,
+                ))
+                ->condition('gsid', $gsid, '=')
+                ->execute();
+      }
+      $session_count--;
+      $timesplayed++;
+      $insert_count++;
+      $new_session = FALSE;
+    }
+
+    // goto next day
+    $this_day_ts += $daysec;
+    $day_count++;
+  }
+
+  drupal_set_message(t('Inserted %records records spread over %days days.', array('%records' => $insert_count, '%days' => $day_count - 1)));
+}
+
+function buckets($bucketlist, $chancelist) {
+  // we generate random values according to buckets
+  // each bucket is a time period in hours that has a chance for generating a value
+  // the size of the bucket is determined by the hours it encompasses
+  // the chance for a value is determined by the chance given and the size of the bucket
+  // we then generate random values between 0 and the total bucket size
+  // the value determines which bucket is lucky
+  // we then draw another random value from that bucket
+  // create list of buckets by start hour for timestamp generation
+  // this generates buckets for 0-2 hours, 2-7 hours etc
+  //  $bucketlist = array(0,2,7,9,12,15,22);
+  //  $chancelist = array(5,3,15,18,24,25,10);
+
+  $count = count($bucketlist);
+
+  // generate buckets
+  // each bucket "to" is the size (next in bucketlist -current bucketlist entry) * chance it has + previous buckets
+  $buckets = array();
+  for ($i = 0; $i < $count; $i++) {
+    $buckets[$i]['from'] = $bucketlist[$i];
+    $buckets[$i]['to'] = $i == $count - 1 ? 24 : $bucketlist[$i + 1];
+    $buckets[$i]['fromsize'] = $i == 0 ? 0 : $buckets[$i - 1]['tosize'];
+    $buckets[$i]['tosize'] = ($buckets[$i]['to'] - $bucketlist[$i]) * ($chancelist[$i] / 100) + $buckets[$i]['fromsize'];
+    //$buckets[$i]['size'] = $buckets[$i]['tosize'] - $buckets[$i]['fromsize'];
+  }
+  return $buckets;
+  //$total_bucket_size = $buckets[$i-1]['tosize'];
+//  foreach ($buckets as $b ) {
+//    $output .= "{$b['from']}-{$b['to']} - {$b['size']}<br>";
+//  }
+}
+
+// return a number of seconds from 0 hours  accoding to the buckets
+function get_timestamp($buckets, $total_bucket_size) {
+
+  // generate a random float between 0 and total bucket size
+  $rand = mt_rand(0, $total_bucket_size * 100) / 100;
+  // find the lucky bucket
+  foreach ($buckets as $b) {
+    if ($rand <= $b['tosize']) {
+      // generate a random number of minutes within bucket range
+      $total_minute_range = ($b['to'] - $b['from']) * 60;
+      $b_rand = mt_rand(0, $total_minute_range);
+
+      // convert minutes back to hour/minutes on 24h clock
+      // $hour = $b['from'] + floor ($b_rand/60);
+      // $minutes = $b_rand % 60;
+
+      $totalseconds = $b['from'] * 60 * 60 + $b_rand * 60;
+      break;
+    }
+  }
+
+  // $output .= "{$hour}:{$minutes}<br>" ;
+  return $totalseconds;
+}
 
 // http://stackoverflow.com/questions/3109670/generate-random-numbers-with-probabilistic-distribution
-
-
-
 //
 //function mkseed()
 //{
@@ -511,43 +742,33 @@ function testdata_form($form, &$form_state, $gid = 0) {
 //    return $rVal;
 //}
 //
-
-
-
-
-
 // http://php.net/manual/en/function.rand.php
 
 
-function gauss()
-{   // N(0,1)
-    // returns random number with normal distribution:
-    //   mean=0
-    //   std dev=1
-    
-    // auxilary vars
-    $x=random_0_1();
-    $y=random_0_1();
-    
-    // two independent variables with normal distribution N(0,1)
-    $u=sqrt(-2*log($x))*cos(2*pi()*$y);
-    $v=sqrt(-2*log($x))*sin(2*pi()*$y);
-    
-    // i will return only one, couse only one needed
-    return $u;
+function gauss() {   // N(0,1)
+  // returns random number with normal distribution:
+  //   mean=0
+  //   std dev=1
+  // auxilary vars
+  $x = random_0_1();
+  $y = random_0_1();
+
+  // two independent variables with normal distribution N(0,1)
+  $u = sqrt(-2 * log($x)) * cos(2 * pi() * $y);
+  $v = sqrt(-2 * log($x)) * sin(2 * pi() * $y);
+
+  // i will return only one, couse only one needed
+  return $u;
 }
 
-function gauss_ms($m=0.0,$s=1.0)
-{   // N(m,s)
-    // returns random number with normal distribution:
-    //   mean=m
-    //   std dev=s
-    
-    return gauss()*$s+$m;
+function gauss_ms($m = 0.0, $s = 1.0) {   // N(m,s)
+  // returns random number with normal distribution:
+  //   mean=m
+  //   std dev=s
+  return gauss() * $s + $m;
 }
 
-function random_0_1()
-{   // auxiliary function
-    // returns random number with flat distribution from 0 to 1
-    return (float)rand()/(float)getrandmax();
+function random_0_1() {   // auxiliary function
+  // returns random number with flat distribution from 0 to 1
+  return (float) rand() / (float) getrandmax();
 }
