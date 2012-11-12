@@ -29,6 +29,16 @@ function portal_statistics_menu() {
       'weight' => 50,
       'options' => array('attributes' => array('class' => array('mg_portal_menu', 'mg_portal_stats'))),
   );
-  
+ $items["portal/game/%portal_games_game/stats"] = array(
+      'title' => 'game stats page',
+      'description' => 'Game stats page',
+      'page callback' => 'portal_game_stats',
+      'page arguments' => array(2),
+      'access arguments' => array('play games'),
+      'file' => 'includes/page.game_stats.inc',
+      'menu_name' => 'microgame_portal',
+      'type' => MENU_CALLBACK,
+      'weight' => 10,
+  );
   return $items;
 }

@@ -4,3 +4,4 @@ package = Microgame Portal Modules
 core = 7.x
 
 dependencies[] = portal_manager
+dependencies[] = portal_games
