@@ -20,6 +20,7 @@ function game_validate() {
     $encrypted = mg_gzfile_get_contents($_FILES['data']['tmp_name']);
     if (!$encrypted) {
       // don't return, just exit
+      watchdog('portal_manager', 'Uploaded game data validation failed', WATCHDOG_ERROR, $link = NULL);
       exit();
     }
     
