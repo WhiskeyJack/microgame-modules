@@ -422,6 +422,7 @@ class Game {
     }
     if (!isset($this->gsid_array['gsid'])) {
       // no match found, return
+      watchdog('portal_manager', 'No matching hash found for stats submit, aborting.', array(), WATCHDOG_ERROR, $link = NULL);
       return;
     }
 

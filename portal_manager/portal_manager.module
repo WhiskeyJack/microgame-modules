@@ -38,7 +38,11 @@ function portal_manager_init() {
     return;
   }
   // not an admin, so user needs to be a member of this group / subdomain
-  if (!array_key_exists(subdomain()->rid(), $user->roles) && current_path() != 'portal/noaccess'){
+  if (!array_key_exists(subdomain()->rid(), $user->roles) 
+          && current_path() != 'portal/noaccess'
+          && current_path() != 'portal/validate'
+          && current_path() != 'portal/newhash'
+          ){
     // user does not have the necessary role
     drupal_goto ('portal/noaccess');
   }
