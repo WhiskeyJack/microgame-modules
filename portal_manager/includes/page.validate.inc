@@ -6,7 +6,7 @@
  */
 function game_validate() {
   $allow_test = TRUE;
-  watchdog('portal_manager', 'Validation Started.', array(), WATCHDOG_DEBUG);
+  // watchdog('portal_manager', 'Validation Started.', array(), WATCHDOG_DEBUG);
   $sdid = subdomain()->id();
 
   // see if we're testing or not
