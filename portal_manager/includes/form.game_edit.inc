@@ -193,6 +193,8 @@ function mg_is_valid_game_name($element, &$form_state) {
 }
 
 function mg_is_valid_youtube_id($element, &$form_state) {
+  if (strlen($element['#value']) == 0  )
+    return;
   if (strlen($element['#value']) != 11 ) {
     form_error($element, t('The specified Youtube video ID must be 11 characters'));
     return;
